@@ -1,0 +1,35 @@
+inboundShortMessage:
+  name: web-messaging-translation-flow
+  division: Home
+  startUpRef: "/inboundShortMessage/states/state[Initial State_10]"
+  defaultLanguage: en-us
+  supportedLanguages:
+    en-us:
+      defaultLanguageSkill:
+        noValue: true
+  settingsErrorHandling:
+    errorHandling:
+      disconnect:
+        none: true
+  states:
+    - state:
+        name: Initial State
+        refId: Initial State_10
+        actions:
+          - sendResponse:
+              name: Send Response
+              messageBody:
+                lit: Hi! How may I help you?
+          - transferToAcd:
+              name: Transfer to ACD
+              targetQueue:
+                lit:
+                  name: web-messaging-queue
+              priority:
+                lit: 0
+              preferredAgents:
+                noValue: true
+              languageSkill:
+                noValue: true
+          - disconnect:
+              name: Disconnect
