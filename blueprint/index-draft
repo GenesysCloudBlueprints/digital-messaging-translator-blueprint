@@ -1,5 +1,5 @@
 ---
-title: Build a digital messaging translation assistant with the AWS Translate service
+title: Build a messaging translation assistant with the AWS Translate service
 author: agnes.corpuz
 indextype: blueprint
 icon: blueprint
@@ -13,6 +13,7 @@ This Genesys Cloud Developer Blueprint provides instructions for building a tran
 
 ![Digital Messaging translation assistant](images/flowchart.png "Digital Messaging translation assistant")
 
+* [Solution](#solution "Goes to the Solution section")
 * [Solution components](#solution-components "Goes to the Solution components section")
 * [Requirements](#requirements "Goes to the Requirements section")
 * [Implementation steps](#implementation-steps "Goes to the Implementation steps section")
@@ -29,13 +30,13 @@ This Genesys Cloud Developer Blueprint provides instructions for building a tran
 * **Genesys Cloud CX** - A suite of Genesys cloud services for enterprise-grade communications, collaboration, and contact center management. In this solution, you use an Architect inbound message flow, and a Genesys Cloud queues, web message configuration and web message deployment.
 * **Archy** - A Genesys Cloud command-line tool for building and managing Architect flows.
 * **CX as Code** - A Genesys Cloud Terraform provider that provides an interface for declaring core Genesys Cloud objects.
-* **AWS IAM** - Identity and Access Management that controls access to AWS resources such as services or features. In this solution, you set the permissions to allow the Digital Messaging Translator to access Amazon Translate and the AWS SDK.
-* **Amazon Translate** - A translation service that enables cross-lingual communication between users of an application. Amazon Translate is the translation service used in the Digital Messaging Translator solution.
+* **AWS IAM** - Identity and Access Management that controls access to AWS resources such as services or features. In this solution, you set the permissions to allow the Messaging Translator to access Amazon Translate and the AWS SDK.
+* **Amazon Translate** - A translation service that enables cross-lingual communication between users of an application. Amazon Translate is the translation service used in the Messaging Translator solution.
 
 ### Software development kits (SDKs)
 
-* **Genesys Cloud Platform API SDK** -Client libraries used to simplify application integration with Genesys Cloud by handling low-level HTTP requests. This SDK is used for the initial chat and messaging interaction between agent and customer.
-* **AWS for JavaScript SDK** - This SDK enables developers to build and deploy applications that use AWS services. This solution uses the JavaScript API to enable the Digital Messaging Translator in an agent's browser and it uses the inside Node.js applications to enable the Digital Messaging Translator on the server where Genesys Cloud runs.
+* **Genesys Cloud Platform API SDK** - Client libraries used to simplify application integration with Genesys Cloud by handling low-level HTTP requests. This SDK is used for the initial chat and messaging interaction between agent and customer.
+* **AWS for JavaScript SDK** - This SDK enables developers to build and deploy applications that use AWS services. This solution uses the JavaScript API to enable the Messaging Translator in an agent's browser and it uses the inside Node.js applications to enable the Messaging Translator on the server where Genesys Cloud runs.
 
 ## Requirements
 
@@ -73,9 +74,11 @@ This Genesys Cloud Developer Blueprint provides instructions for building a tran
 ## Implementation steps
 
 * [Download the repository containing the project files](#download-the-repository-containing-the-project-files "Goes to the Download the repository containing the project files section")
-* [Create a Token Implicit OAuth Grant for Genesys Cloud](#create-a-token-implicit-oauth-grant-for-genesys-cloud "Goes to the Create a Token Implicit OAuth Grant for Genesys Cloud section")
 * [Set up AWS Translate](#set-up-aws-translate "Goes to the Set up AWS Translate section")
-* [Install and activate the Digital Messaging Translator in Genesys Cloud](#install-and-activate-the-digital-messaging-translator-in-genesys-cloud "Goes to the Install and activate the Digital Messaging Translator in Genesys Cloud section")
+* [Set up Genesys Cloud](#set-up-genesys-cloud "Goes to the Set up Genesys Cloud section")
+* [Configure your Terraform build](#configure-your-terraform-build "Goes to the Configure your Terraform build section")
+* [Run Terraform](#run-terraform "Goes to the Run Terraform section")
+* [Additional configurations](#additional-configurations "Goes to the Additional configurations section")
 * [Host and run the Node.js app server](#host-and-run-the-node-js-app-server "Goes to the Host and run the Node.js app server section")
 * [Test the solution](#test-the-solution "Goes to the Test the solution section")
 
@@ -97,19 +100,17 @@ This Genesys Cloud Developer Blueprint provides instructions for building a tran
 
 ### Set up Genesys Cloud
 
-1. To run this project using the AWS Terraform provider, open a terminal window and set the following environment variables:
+1. To run this project using the Terraform provider, open a terminal window and set the following environment variables:
 
  * `GENESYSCLOUD_OAUTHCLIENT_ID` - This is the Genesys Cloud client credential grant Id that CX as Code executes against. 
  * `GENESYSCLOUD_OAUTHCLIENT_SECRET` - This is the Genesys Cloud client credential secret that CX as Code executes against. 
  * `GENESYSCLOUD_REGION` - This is the Genesys Cloud region in your organization.
- * `AWS_ACCESS_KEY_ID` - This is the AWS Access Key you must set up in your Amazon account to allow the AWS Terraform provider to act against your account.
- * `AWS_SECRET_ACCESS_KEY` - This is the AWS Secret you must set up in your Amazon account to allow the AWS Terraform provider to act against your account.
 
 2. Run Terraform in the terminal window where the environment variables are set. 
 
 ### Configure your Terraform build
 
-You must define several values that are specific to your AWS region and Genesys Cloud organization. 
+You must define several values that are specific to your Genesys Cloud organization. 
 
 In the blueprint/terraform/dev.auto.tfvars file, set the following values:
 
@@ -159,7 +160,7 @@ You also neeed to update the config file found in /docs/scripts/config.js to use
   * To upgrade, type `nvm install 14.15.4`.
   * To install the latest version, type `npm install -g n latest`.
 
-2. Switch to the directory where the files for your Digital Messaging Translator project are located and install the dependencies in the local node-modules folder. In the command line, type `npm install`.
+2. Switch to the directory where the files for your Messaging Translator project are located and install the dependencies in the local node-modules folder. In the command line, type `npm install`.
 3. To run the server locally, in the command line type `node run-local.js`.
 
 ### Test the solution
@@ -169,11 +170,11 @@ You also neeed to update the config file found in /docs/scripts/config.js to use
 1. Go to your website and start a web message.
    ![Start web message interaction](images/start-web-message.png "Start web message interaction")
 2. To answer the message as an agent, in your Genesys Cloud organization change your status to **On Queue** and then answer the incoming interaction.
-3. To open the Digital Messaging Translator, click the **Digital Messaging Translator** button, which appears in the agent's toolbar.
+3. To open the Messaging Translator, click the **Messaging Translator** button, which appears in the agent's toolbar.
    ![Web message interaction](images/web-message-interaction.png "Incoming web message interaction")
-4. Practice sending and receiving messages in different languages. When you type a message, the Digital Messaging Translator automatically translates it into the language that the customer is using.
+4. Practice sending and receiving messages in different languages. When you type a message, the Messaging Translator automatically translates it into the language that the customer is using.
   :::primary
-  **Important**: Make sure to type on the right side of the interaction for the Digital Messaging Translator app to successfully translate the agent's message.
+  **Important**: Make sure to type on the right side of the interaction for the Messaging Translator app to successfully translate the agent's message.
   :::
   ![Translated message](images/web-message-translate.png "Translated message")
   ![Customer view](images/web-message-translate-customer.png "Customer view")
@@ -199,10 +200,10 @@ You also neeed to update the config file found in /docs/scripts/config.js to use
 5. To start a chat as a customer, click **Start Chat**.
 6. To answer the chat as an agent, in your Genesys Cloud organization change your status to **On Queue** and then answer the incoming interaction.
   ![Chat interaction](images/chat-interaction.png "Incoming chat interaction")
-7. To open the Digital Messaging Translator, click the **Digital Messaging Translator** button, which appears in the agent's toolbar.
-8. Practice sending and receiving chats in different languages. When you type a chat, the Digital Messaging Translator automatically translates it into the language that the customer is using.
+7. To open the Messaging Translator, click the **Messaging Translator** button, which appears in the agent's toolbar.
+8. Practice sending and receiving chats in different languages. When you type a chat, the Messaging Translator automatically translates it into the language that the customer is using.
   :::primary
-  **Important**: Make sure to type on the right side of the interaction for the Digital Messaging Translator app to successfully translate the agent's message.
+  **Important**: Make sure to type on the right side of the interaction for the Messaging Translator app to successfully translate the agent's message.
   :::
   ![Translated chat](images/chat-translate.png "Translated chat")
 9. To send a translated canned response, click **Open Canned Responses** and select a canned response.  
@@ -211,7 +212,6 @@ You also neeed to update the config file found in /docs/scripts/config.js to use
 ## Additional resources
 
 * [Genesys Cloud Platform Client SDK](https://developer.mypurecloud.com/api/rest/client-libraries/ "Opens the Genesys Cloud Platform Client SDK page")
-* [Genesys AppFoundry](https://appfoundry.genesys.com/filter/genesyscloud "Opens the Genesys AppFoundry")
 * [About web messaging](https://help.mypurecloud.com/articles/about-web-messaging/)
 * [Amazon Translate](https://aws.amazon.com/translate/ "Opens Amazon Translate page") in the AWS documentation
-* [Chat-translator-blueprint repository](https://github.com/GenesysCloudBlueprints/chat-translator-blueprint "Opens the chat-translator-blueprint repository in GitHub")
+* [digital-messaging-translator-blueprint repository](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint "Opens the chat-translator-blueprint repository in GitHub")
