@@ -1,3 +1,5 @@
+//TODO - Super nice
+
 resource "genesyscloud_oauth_client" "implicit-client" {
   name                          = "Web Messages Implicit Client"
   description                   = "For web messaging"

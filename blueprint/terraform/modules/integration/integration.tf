@@ -1,6 +1,8 @@
 /*
   Creates the interaction widget inntegration
 */
+
+//TODO NICE!!!!!
 resource "genesyscloud_integration" "integration" {
   intended_state   = "ENABLED"
   integration_type = "embedded-client-app-interaction-widget"
