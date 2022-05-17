@@ -1,8 +1,8 @@
 inboundShortMessage:
-  name: web-messaging-translation-flow
+  name: "{{flow_name}}"
   division: Home
   startUpRef: "/inboundShortMessage/states/state[Initial State_10]"
-  defaultLanguage: en-us
+  defaultLanguage: "{{default_language}}"
   supportedLanguages:
     en-us:
       defaultLanguageSkill:
@@ -19,12 +19,12 @@ inboundShortMessage:
           - sendResponse:
               name: Send Response
               messageBody:
-                lit: Hi! How may I help you?
+                lit: "{{greeting}}"
           - transferToAcd:
               name: Transfer to ACD
               targetQueue:
                 lit:
-                  name: web-messaging-queue
+                  name: "{{queue_name}}"
               priority:
                 lit: 0
               preferredAgents:

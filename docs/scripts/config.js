@@ -1,6 +1,6 @@
 export default {
     // Token Implicit Grant Client ID
-    clientID: 'youre-client-id-here',
+    clientID: 'your-client-id-here',
 
     redirectUri: 'https://localhost/',
 

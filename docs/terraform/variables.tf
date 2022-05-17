@@ -8,7 +8,7 @@ variable "environment" {
   description = "Name of the environment, e.g., dev, test, stable, staging, uat, prod etc."
 }
 
-variable "userId" {
+variable "email" {
   type        = string
-  description = "Your user ID"
+  description = "Your user email"
 }

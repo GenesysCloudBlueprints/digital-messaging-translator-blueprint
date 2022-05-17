@@ -28,7 +28,6 @@ This Genesys Cloud Developer Blueprint provides instructions for building a tran
 ## Solution components
 
 * **Genesys Cloud CX** - A suite of Genesys cloud services for enterprise-grade communications, collaboration, and contact center management. In this solution, you use an Architect inbound message flow, and a Genesys Cloud queues, web message configuration and web message deployment.
-* **Archy** - A Genesys Cloud command-line tool for building and managing Architect flows.
 * **CX as Code** - A Genesys Cloud Terraform provider that provides an interface for declaring core Genesys Cloud objects.
 * **AWS IAM** - Identity and Access Management that controls access to AWS resources such as services or features. In this solution, you set the permissions to allow the Messaging Translator to access Amazon Translate and the AWS SDK.
 * **Amazon Translate** - A translation service that enables cross-lingual communication between users of an application. Amazon Translate is the translation service used in the Messaging Translator solution.
@@ -51,7 +50,6 @@ This Genesys Cloud Developer Blueprint provides instructions for building a tran
 
 * A Genesys Cloud license. For more information, see [Genesys Cloud Pricing](https://www.genesys.com/pricing "Opens the Genesys Cloud pricing page") in the Genesys website.
 * The Master Admin role. For more information, see [Roles and permissions overview](https://help.mypurecloud.com/?p=24360 "Opens the Roles and permissions overview article") in the Genesys Cloud Resource Center.
-* Archy. For more information see, [Welcome to Archy](https://developer.genesys.cloud/devapps/archy/ "Goes to the Welcome to Archy page") in the Genesys Cloud Developer Center.
 * CX as Code. For more information see, [CX as Code](https://developer.genesys.cloud/devapps/cx-as-code/ "Goes to the CX as Code page") in the Genesys Cloud Developer Center.
 
 ### AWS account
@@ -63,13 +61,7 @@ This Genesys Cloud Developer Blueprint provides instructions for building a tran
 ### Development tools running in your local environment
 
 * Terraform (the latest binary). For more information, see [Download Terraform](https://www.terraform.io/downloads.html "Goes to the Download Terraform page") on the Terraform website.
-* Golang 1.16 or higher. For more information, see [Downloads](https://go.dev/dl/ "Goes to the Downloads page") on the Go website. 
-* Archy (the latest version). Archy is Genesys Cloud's command line to deploy Genesys Cloud Architect flows. For more information, see: 
-
-  * [Archy Documentation](https://developer.genesys.cloud/devapps/archy/ "Goes to the Welcome to Archy page")
-  * [Installing and Configuring Archy - Video](https://www.youtube.com/watch?v=fOI_vq3PnM8 "Goes to the DevDrop 8a: Installing and configuring Archy video") in YouTube
-  * [Exporting flows with Archy - Video](https://www.youtube.com/watch?v=QAmkM_agsrY "Goes to the DevDrop 8b: Exporting flows with Archy video") in YouTube
-  * [Importing flows with Archy - Video](https://www.youtube.com/watch?v=3NwGJ9X1O0s "Goes to the DevDrop 8c: Importing an Architect flow using Archy video") in YouTube
+* Golang 1.16 or higher. For more information, see [Downloads](https://go.dev/dl/ "Goes to the Downloads page") on the Go website.
 
 ## Implementation steps
 
@@ -116,21 +108,21 @@ In the blueprint/terraform/dev.auto.tfvars file, set the following values:
 
 * `environment` - This is a free-form field that combines with the prefix value to define the name of various Genesys Cloud artifacts. For example, if you set the environment name to be `dev` and the prefix to be `web-messaging` your Genesys Cloud group, queue, messenger configuration, messenger deployment, etc.will all begin with `dev-web-messaging`.
 * `prefix`- This a free-form field that combines with the environment value to define the name of various Genesys Cloud artifacts.
-* `userId` - your Genesys Cloud user ID. This will bee used to assign you to the Genesys Cloud group and queue.
+* `email` - your email used in Genesys Cloud. This will bee used to assign you to the Genesys Cloud group and queue.
 
 The following is an example of the dev.auto.tfvars file that was created by the author of this blueprint.
 
 ```
 environment            = "dev"
 prefix                 = "web-messaging"
-userId                 = "6ade8ef8-bbc5-4f05-9ad5-31be015fda25"
+email                  = "test-email@company.com"
 ```
 
 ### Run Terraform
 
 You are now ready to run this blueprint solution for your organization. 
 
-1. Change to the blueprints/terraform folder and issue these commands:
+1. Change to the docs/terraform folder and issue these commands:
 
 * `terraform plan` - This executes a trial run against your Genesys Cloud organization and shows you a list of all the Genesys Cloud resources created. Review this list and make sure you are comfortable with the activity being undertake before continuing to the second step.
 
@@ -140,7 +132,7 @@ After the `terraform apply --auto-approve` command has completed, you should see
 
 *  This project assumes you are running using a local Terraform backing state. This means that the `tfstate` files will be created in the same folder where you ran the project. Terraform does not recommend using local Terraform backing state files unless you run from a desktop and are comfortable with the deleted files.
 
-* As long as your local Terraform backing state projects are kept, you can tear down the blueprint in question by changing to the `blueprint/terraform` folder and issuing a `terraform destroy --auto-approve` command. This destroys all objects currently managed by the local Terraform backing state.
+* As long as your local Terraform backing state projects are kept, you can tear down the blueprint in question by changing to the `docs/terraform` folder and issuing a `terraform destroy --auto-approve` command. This destroys all objects currently managed by the local Terraform backing state.
 
 ### Additional configurations
 

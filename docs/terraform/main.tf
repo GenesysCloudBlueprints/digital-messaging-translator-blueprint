@@ -6,12 +6,19 @@ module "implicit_oauth" {
 }
 
 /*
+   Looks up the id of the user so we can associate it with the queue and group
+*/
+data "genesyscloud_user" "user" {
+  email = var.email
+}
+
+/*
    Creates the queues used within the flow
 */
 module "classifier_queues" {
   source                   = "git::https://github.com/GenesysCloudDevOps/genesys-cloud-queues-demo.git?ref=main"
   classifier_queue_names   = ["web-messaging-queue"]
-  classifier_queue_members = [var.userId]
+  classifier_queue_members = [data.genesyscloud_user.user.id]
 }
 
 data "genesyscloud_routing_queue" "Queues" {
@@ -19,6 +26,13 @@ data "genesyscloud_routing_queue" "Queues" {
     module.classifier_queues
   ]
   name = "web-messaging-queue"
+}
+
+/*   
+   Configures the architect inbound message flow
+*/
+module "archy_flow" {
+  source      = "./modules/flow"
 }
 
 /*   
@@ -30,23 +44,6 @@ module "web_config" {
   prefix      = var.prefix
 }
 
-/*
-   Looks up the id of the flow so we can associate it with a widget
-*/
-data "genesyscloud_flow" "webMsgFlow" {
-  depends_on = [
-    null_resource.deploy_archy_flow_chat
-  ]
-  name = "web-messaging-translation-flow"
-}
-
-data "genesyscloud_webdeployments_configuration" "webMsgConfiguration" {
-  depends_on = [
-    module.web_config
-  ]
-  name = "${var.environment}-${var.prefix}-configuration"
-}
-
 /*   
    Configures the web deployment
 */
@@ -54,9 +51,9 @@ module "web_deploy" {
   source      = "./modules/webdeployments_deployment"
   environment = var.environment
   prefix      = var.prefix
-  flowId      = data.genesyscloud_flow.webMsgFlow.id
-  configId    = data.genesyscloud_webdeployments_configuration.webMsgConfiguration.id
-  configVer   = data.genesyscloud_webdeployments_configuration.webMsgConfiguration.version
+  flowId      = module.archy_flow.flow_id
+  configId    = module.web_config.config_id
+  configVer   = module.web_config.config_ver
 }
 
 /*   
@@ -64,14 +61,7 @@ module "web_deploy" {
 */
 module "group" {
   source = "./modules/group"
-  userId = var.userId
-}
-
-data "genesyscloud_group" "group" {
-  depends_on = [
-    module.group
-  ]
-  name = "Web Messaging Group"
+  userId = data.genesyscloud_user.user.id
 }
 
 /*   
@@ -80,5 +70,5 @@ data "genesyscloud_group" "group" {
 module "interaction_widget" {
   source  = "./modules/integration"
   queueId = data.genesyscloud_routing_queue.Queues.id
-  groupId = data.genesyscloud_group.group.id
+  groupId = module.group.group_id
 }
