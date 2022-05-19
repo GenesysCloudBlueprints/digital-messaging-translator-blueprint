@@ -15,17 +15,10 @@ data "genesyscloud_user" "user" {
 /*
    Creates the queues used within the flow
 */
-module "classifier_queues" {
+module "queue" {
   source                   = "git::https://github.com/GenesysCloudDevOps/genesys-cloud-queues-demo.git?ref=main"
   classifier_queue_names   = ["web-messaging-queue"]
   classifier_queue_members = [data.genesyscloud_user.user.id]
-}
-
-data "genesyscloud_routing_queue" "Queues" {
-  depends_on = [
-    module.classifier_queues
-  ]
-  name = "web-messaging-queue"
 }
 
 /*   
@@ -69,6 +62,6 @@ module "group" {
 */
 module "interaction_widget" {
   source  = "./modules/integration"
-  queueId = data.genesyscloud_routing_queue.Queues.id
+  queueId = module.queue.queue_ids["web-messaging-queue"]
   groupId = module.group.group_id
 }
