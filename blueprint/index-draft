@@ -11,7 +11,21 @@ summary: |
 
 This Genesys Cloud Developer Blueprint provides instructions for building a translation assistant which uses the AWS Translate service to allow customers and agents to chat in their preferred languages. The translation assistant automatically translates everything in the integration window in real-time, including canned responses. This supports both web chat and web messaging interactions. All the components used in this solution can be deployed using Terraform Genesys Cloud CX as Code provider.
 
-![Digital Messaging translation assistant](images/flowchart.png "Digital Messaging translation assistant")
+![Digital Messaging translation assistant](images/overview.png "Digital Messaging translation assistant")
+
+## Scenario
+
+An organization wants to provide a real-time translation for web chat and web messaging that would allow both their customers and agents have a conversation using their preferred language. To do this, the organization wants to:
+
+1. **The customer sends a message using their preferred language.** The agent will receive an incoming interaction and will see the customer's message.
+
+2. **Have the agent open the Message Translator interaction widget.** The agent opens the widget for the interaction and have the widget display the message translation based on their configured preferred language in Genesys Cloud.
+
+3. **Allow the agent to send messages using their preferred language.** The agent types and sends a response in the widget chat box using their preferred language.
+
+4. **Customer receives the agent's reposonse translated in their language.** The customer will see a translated response from the agent.
+
+## Content
 
 * [Solution](#solution "Goes to the Solution section")
 * [Solution components](#solution-components "Goes to the Solution components section")
@@ -37,7 +51,7 @@ This Genesys Cloud Developer Blueprint provides instructions for building a tran
 * **Genesys Cloud Platform API SDK** - Client libraries used to simplify application integration with Genesys Cloud by handling low-level HTTP requests. This SDK is used for the initial chat and messaging interaction between agent and customer.
 * **AWS for JavaScript SDK** - This SDK enables developers to build and deploy applications that use AWS services. This solution uses the JavaScript API to enable the Messaging Translator in an agent's browser and it uses the inside Node.js applications to enable the Messaging Translator on the server where Genesys Cloud runs.
 
-## Requirements
+## Prerequisites
 
 ### Specialized knowledge
 
@@ -204,6 +218,6 @@ You also neeed to update the config file found in /docs/scripts/config.js to use
 ## Additional resources
 
 * [Genesys Cloud Platform Client SDK](https://developer.mypurecloud.com/api/rest/client-libraries/ "Opens the Genesys Cloud Platform Client SDK page")
-* [About web messaging](https://help.mypurecloud.com/articles/about-web-messaging/)
+* [About web messaging](https://help.mypurecloud.com/articles/about-web-messaging/ "Opens the About Web Messaging page")
 * [Amazon Translate](https://aws.amazon.com/translate/ "Opens Amazon Translate page") in the AWS documentation
 * [digital-messaging-translator-blueprint repository](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint "Opens the chat-translator-blueprint repository in GitHub")
