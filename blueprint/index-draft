@@ -25,14 +25,6 @@ An organization wants to provide a real-time translation for web chat and web me
 
 4. **Customer receives the agent's reposonse translated in their language.** The customer will see a translated response from the agent.
 
-## Content
-
-* [Solution](#solution "Goes to the Solution section")
-* [Solution components](#solution-components "Goes to the Solution components section")
-* [Requirements](#requirements "Goes to the Requirements section")
-* [Implementation steps](#implementation-steps "Goes to the Implementation steps section")
-* [Additional resources](#additional-resources "Goes to the Additional resources section")
-
 ## Solution
 
 * **Architect inbound message flow** - Provides the routing layer that gets the customer to the right queue.
