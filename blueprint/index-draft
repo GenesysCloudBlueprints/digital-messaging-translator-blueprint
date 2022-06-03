@@ -25,13 +25,13 @@ An organization wants to provide a real-time translation for web chat and web me
 
 ## Solution components
 
-* **Genesys Cloud CX** - A suite of Genesys cloud services for enterprise-grade communications, collaboration, and contact center management. In this solution, you use an Architect inbound message flow, and a Genesys Cloud queues, web message configuration and web message deployment.
+* **Genesys Cloud CX** - A suite of Genesys Cloud services for enterprise-grade communications, collaboration, and contact center management. In this solution, you use an Architect inbound message flow, an Genesys Cloud integration, a Genesys Cloud queue, web messaging configuration, and web messaging deployment.
+* **Architect flows** - A flow in Architect, a drag and drop web-based design tool, dictates how Genesys Cloud handles inbound or outbound interactions.  In this soltuion, an inbound message flow provides the routing layer that gets the customer to the right queue.
+* **Interaction widget integration** - The Genesys Cloud integration that enables web apps to be embedded in an iframe within Genesys Cloud. The iframe  appears only on specified interaction types and to specified agents. For this solution, Genesys Cloud uses the Interaction Widget integration to show translated web chat and web messages to the customer.
+* **Web messaging and Messenger** - The Genesys Cloud messaging platform that enables asynchronous conversations and a unified agent and supervisor experience across all Genesys Cloud messaging channels. Messenger is the predefined message window that customers use to communicate with bots and agents. 
 * **CX as Code** - A Genesys Cloud Terraform provider that provides an interface for declaring core Genesys Cloud objects.
-* **Architect inbound message flow** - Provides the routing layer that gets the customer to the right queue.
-* **Interaction widget integration** - The Genesys Cloud integration that enables web apps to be embedded in an iframe within Genesys Cloud. The iframe only appears on specified interaction types and to specified agents. For this solution, Genesys Cloud uses the Interaction Widget integration to show translated web chat and web messages to the customer.
-* **Web messenger** - Allows developers to create and configure a JavaScript web messenger that deploys to their organization's website where customers can interact with it.
-* **AWS IAM** - Identity and Access Management that controls access to AWS resources such as services or features. In this solution, you set the permissions to allow the Messaging Translator to access Amazon Translate and the AWS SDK.
-* **Amazon Translate** - A translation service that enables cross-lingual communication between users of an application. Amazon Translate is the translation service used in the Messaging Translator solution.
+* **AWS IAM** - Identity and Access Management that controls access to AWS resources such as services or features. In this solution, you set the permissions to allow the translation assistant to access Amazon Translate and the AWS for JavaScript SDK.
+* **Amazon Translate** - A translation service that enables cross-lingual communication between users of an application. Amazon Translate is the translation service used in this solution.
 
 ### Software development kits (SDKs)
 
