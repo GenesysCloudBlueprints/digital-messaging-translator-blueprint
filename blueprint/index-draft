@@ -6,35 +6,30 @@ icon: blueprint
 image: images/banner.png
 category: 6
 summary: |
-  This Genesys Cloud Developer Blueprint provides instructions for building a translation assistant which uses the AWS Translate service to allow customers and agents to chat in their preferred languages. The translation assistant automatically translates everything in the integration window in real-time, including canned responses. This supports both web chat and web messaging interactions. All the components used in this solution can be deployed using Terraform Genesys Cloud CX as Code provider.
+  This Genesys Cloud Developer Blueprint provides instructions for building a translation assistant which uses the AWS Translate service to allow customers and agents to chat in their preferred languages. The translation assistant automatically translates everything in the integration window in real-time, including canned responses. This supports both web chat and web messaging interactions. You can deploy all the components used in this solution with the Terraform Genesys Cloud CX as Code provider.
 ---
 
-This Genesys Cloud Developer Blueprint provides instructions for building a translation assistant which uses the AWS Translate service to allow customers and agents to chat in their preferred languages. The translation assistant automatically translates everything in the integration window in real-time, including canned responses. This supports both web chat and web messaging interactions. All the components used in this solution can be deployed using Terraform Genesys Cloud CX as Code provider.
+This Genesys Cloud Developer Blueprint provides instructions for building a translation assistant which uses the AWS Translate service to allow customers and agents to chat in their preferred languages. The translation assistant automatically translates everything in the integration window in real-time, including canned responses. This supports both web chat and web messaging interactions. You can deploy all the components used in this solution with the Terraform Genesys Cloud CX as Code provider.
 
 ![Digital Messaging translation assistant](images/overview.png "Digital Messaging translation assistant")
 
 ## Scenario
 
-An organization wants to provide a real-time translation for web chat and web messaging that would allow both their customers and agents have a conversation using their preferred language. To do this, the organization wants to:
+An organization wants to provide a real-time translation for web chat and web messaging that allows customers and agents to have a conversation using their preferred languages:
 
-1. **The customer sends a message using their preferred language.** The agent will receive an incoming interaction and will see the customer's message.
+1. **The customer sends a message in their preferred language.** The agent receives the customer's incoming message in its original language.
 
-2. **Have the agent open the Message Translator interaction widget.** The agent opens the widget for the interaction and have the widget display the message translation based on their configured preferred language in Genesys Cloud.
+2. **The agent opens the Message Translator interaction widget.** The widget uses the agent's preferred language, as configured in Genesys Cloud, to display the appropriate message translation. 
 
-3. **Allow the agent to send messages using their preferred language.** The agent types and sends a response in the widget chat box using their preferred language.
-
-4. **Customer receives the agent's reposonse translated in their language.** The customer will see a translated response from the agent.
-
-## Solution
-
-* **Architect inbound message flow** - Provides the routing layer that gets the customer to the right queue.
-* **Interaction widget integration** - The Genesys Cloud integration that enables web apps to be embedded in an iframe within Genesys Cloud. The iframe only appears on specified interaction types and to specified agents. For this solution, Genesys Cloud uses the Interaction Widget integration to show translated web chat and web messages to the customer.
-* **Web messenger** - Allows developers to create and configure a JavaScript web messenger that deploys to their organization's website where customers can interact with it.
+3. **The agent sends a message in their preferred language.** The customer receives the agent's response translated in the customer's preferred language.
 
 ## Solution components
 
 * **Genesys Cloud CX** - A suite of Genesys cloud services for enterprise-grade communications, collaboration, and contact center management. In this solution, you use an Architect inbound message flow, and a Genesys Cloud queues, web message configuration and web message deployment.
 * **CX as Code** - A Genesys Cloud Terraform provider that provides an interface for declaring core Genesys Cloud objects.
+* **Architect inbound message flow** - Provides the routing layer that gets the customer to the right queue.
+* **Interaction widget integration** - The Genesys Cloud integration that enables web apps to be embedded in an iframe within Genesys Cloud. The iframe only appears on specified interaction types and to specified agents. For this solution, Genesys Cloud uses the Interaction Widget integration to show translated web chat and web messages to the customer.
+* **Web messenger** - Allows developers to create and configure a JavaScript web messenger that deploys to their organization's website where customers can interact with it.
 * **AWS IAM** - Identity and Access Management that controls access to AWS resources such as services or features. In this solution, you set the permissions to allow the Messaging Translator to access Amazon Translate and the AWS SDK.
 * **Amazon Translate** - A translation service that enables cross-lingual communication between users of an application. Amazon Translate is the translation service used in the Messaging Translator solution.
 
@@ -70,15 +65,6 @@ An organization wants to provide a real-time translation for web chat and web me
 * Golang 1.16 or higher. For more information, see [Downloads](https://go.dev/dl/ "Goes to the Downloads page") on the Go website.
 
 ## Implementation steps
-
-* [Download the repository containing the project files](#download-the-repository-containing-the-project-files "Goes to the Download the repository containing the project files section")
-* [Set up AWS Translate](#set-up-aws-translate "Goes to the Set up AWS Translate section")
-* [Set up Genesys Cloud](#set-up-genesys-cloud "Goes to the Set up Genesys Cloud section")
-* [Configure your Terraform build](#configure-your-terraform-build "Goes to the Configure your Terraform build section")
-* [Run Terraform](#run-terraform "Goes to the Run Terraform section")
-* [Additional configurations](#additional-configurations "Goes to the Additional configurations section")
-* [Host and run the Node.js app server](#host-and-run-the-node-js-app-server "Goes to the Host and run the Node.js app server section")
-* [Test the solution](#test-the-solution "Goes to the Test the solution section")
 
 ### Download the repository containing the project files
 
