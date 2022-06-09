@@ -197,4 +197,4 @@ You also need to update the config file found in /docs/scripts/config.js to use 
 * [SDK Documentation Explorer](https://developer.genesys.cloud/devapps/sdk/docexplorer "Opens the Genesys Cloud Platform Client SDK page")
 * [About web messaging](https://help.mypurecloud.com/articles/about-web-messaging/ "Opens the About Web Messaging page")
 * [Amazon Translate](https://aws.amazon.com/translate/ "Opens Amazon Translate page in the AWS documentation") 
-* [digital-messaging-translator-blueprint repository](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint "Opens the chat-translator-blueprint repository in GitHub")
+* [digital-messaging-translator-blueprint repository](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint "Opens the chat-translator-blueprint repository in GitHub") 
