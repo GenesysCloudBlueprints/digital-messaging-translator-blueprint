@@ -62,7 +62,6 @@ An organization wants to provide a real-time translation for web chat and web me
 ### Development tools running in your local environment
 
 * Terraform (the latest binary). For more information, see [Download Terraform](https://www.terraform.io/downloads.html "Goes to the Download Terraform page") on the Terraform website.
-* Golang 1.16 or higher. For more information, see [Downloads](https://go.dev/dl/ "Goes to the Downloads page") on the Go website.
 
 ## Implementation steps
 
@@ -90,7 +89,7 @@ An organization wants to provide a real-time translation for web chat and web me
  * `GENESYSCLOUD_OAUTHCLIENT_SECRET` - This variable is the Genesys Cloud client credential secret that CX as Code executes against. 
  * `GENESYSCLOUD_REGION` - This variable is the Genesys Cloud region in your organization.
 
-2. Run Terraform in the Terminal window where you set the environment variables. 
+2. Run Terraform in the folder where you set the environment variables. 
 
 ### Configure your Terraform build
 
@@ -124,7 +123,7 @@ After the `terraform apply --auto-approve` command completes, you should see the
 
 * As long as you keep your local Terraform backing state projects, you can tear down this blueprint solution by changing to the `docs/terraform` folder and issuing a `terraform destroy --auto-approve` command. This command destroys all objects currently managed by the local Terraform backing state.
 
-### Additional configurations
+### Web messaging only: deploy the snippet to your website
 
 After you have created the Genesys Cloud objects, use a Messenger deployment to add a Messenger chat window to your website.
 
