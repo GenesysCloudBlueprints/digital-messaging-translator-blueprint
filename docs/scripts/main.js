@@ -453,10 +453,10 @@ client.loginImplicitGrant(
     currentConversation = conv;
     let customer = conv.participants.find(p => p.purpose == 'customer')
 
-    if(customer.chats.length > 0) {
+    if(null != customer.chats && customer.chats.length > 0) {
         messageType = 'chat';
         customerName = customer.name;
-    } else if (customer.messages.length > 0){
+    } else if (null != customer.messages && customer.messages.length > 0){
         messageType = 'message';
         customerName = 'customer';
     }

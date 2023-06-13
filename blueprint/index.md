@@ -130,17 +130,17 @@ After the `terraform apply --auto-approve` command completes, you should see the
 
 * As long as you keep your local Terraform backing state projects, you can tear down this blueprint solution by changing to the `docs/terraform` folder and issuing a `terraform destroy --auto-approve` command. This command destroys all objects currently managed by the local Terraform backing state.
 
+### Update the config file found in /docs/scripts/config.js to use the OAuth client
+
+1. Navigate to **Admin** > **Integrations** > **OAuth** > **Web Messages Implicit Client**.
+2. In your local blueprint repository, open the [config.js](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint/blob/main/docs/scripts/config.js) file. Add the client ID from your OAuth client and specify the region where your Genesys Cloud organization is located, for example, `mypurecloud.ie` or `mypurecloud.com.au`.
+
 ### Web messaging only: deploy the snippet to your website
 
 After you have created the Genesys Cloud objects, use a Messenger deployment to add a Messenger chat window to your website.
 
 1. Navigate to **Admin** > **Message** > **Messenger Deployments** > **dev-web-messaging-deployment**.
 2. Under **Deploy your snippet**, click **Copy to Clipboard** to copy the snippet. Paste the snippet in the `<head>` tag of the web pages where you want the Messenger to appear.
-
-You also need to update the config file found in /docs/scripts/config.js to use the OAuth client.
-
-1. Navigate to **Admin** > **Integrations** > **OAuth** > **Web Messages Implicit Client**.
-2. Add the client ID from your OAuth client and specify the region for your Genesys Cloud organization, for example, `mypurecloud.ie` or `mypurecloud.com.au`.
 
 ### Host and run the Node.js app server
 
