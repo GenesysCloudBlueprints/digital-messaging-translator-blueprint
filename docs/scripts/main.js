@@ -77,6 +77,10 @@ let onMessage = (data) => {
             // Heartbeat
             //console.info('Ignoring metadata: ', notification);
             return;
+        } else if (data.eventBody.conversationId != currentConversationId) {
+            // Conversation event not related to the current conversationId (in this frame)
+            // Ignore
+            return;
         } else if (data.eventBody.participants.find(p => p.purpose == 'customer').endTime) {
             console.log('ending conversation');
         } else {
@@ -104,13 +108,16 @@ let onMessage = (data) => {
                 .then((messageDetail => {
                     // Make sure message is published only once
                     if(!messageIds.includes(messageId)){
-                        messageIds.push(messageId);
+                        // Ignore messages without text (e.g. Presence/Disconect Event)
+                        if (null != messageDetail.textBody) {
+                            messageIds.push(messageId);
 
-                        // Wait for translate to finish before calling addChatMessage
-                        translate.translateText(messageDetail.textBody, genesysCloudLanguage, function(translatedData) {
-                            view.addChatMessage(name, translatedData.translated_text, purpose);
-                            translationData = translatedData;
-                        });
+                            // Wait for translate to finish before calling addChatMessage
+                            translate.translateText(messageDetail.textBody, genesysCloudLanguage, function(translatedData) {
+                                view.addChatMessage(name, translatedData.translated_text, purpose);
+                                translationData = translatedData;
+                            });
+                        }
                     }                    
                 }));          
             }            
@@ -230,22 +237,25 @@ function showChatTranscript(conversationId){
             // Show each message
             data.entities.forEach((msg) => {
                 let message = msg.textBody;
-                let name = '';
-                let purpose = '';
+                // Ignore message withtout text (e.g. Presence/Disconnect Event)
+                if (null != message) {
+                    let name = '';
+                    let purpose = '';
 
-                if(msg.direction === 'inbound') {
-                    name = customerName;
-                    purpose = 'customer';
-                } else {
-                    name = agentAlias;
-                    purpose = 'agent'
+                    if(msg.direction === 'inbound') {
+                        name = customerName;
+                        purpose = 'customer';
+                    } else {
+                        name = agentAlias;
+                        purpose = 'agent'
+                    }
+
+                    // Wait for translate to finish before calling addChatMessage
+                    translate.translateText(message, genesysCloudLanguage, function(translatedData) {
+                        view.addChatMessage(name, translatedData.translated_text, purpose);
+                        translationData = translatedData;
+                    });
                 }
-
-                // Wait for translate to finish before calling addChatMessage
-                translate.translateText(message, genesysCloudLanguage, function(translatedData) {
-                    view.addChatMessage(name, translatedData.translated_text, purpose);
-                    translationData = translatedData;
-                });
             });
         });
     }
@@ -459,6 +469,9 @@ client.loginImplicitGrant(
     } else if (null != customer.messages && customer.messages.length > 0){
         messageType = 'message';
         customerName = 'customer';
+        if (null != customer.attributes && customer.attributes.hasOwnProperty('name')) {
+            customerName = customer.attributes['name'];
+        }
     }
 
     return setupChatChannel(currentConversationId);
