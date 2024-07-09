@@ -85,7 +85,7 @@ let onMessage = (data) => {
             console.log('ending conversation');
         } else {
             data.eventBody.participants.forEach((participant) => {
-                if(!participant.endTime) {
+                if(!participant.endTime && Array.isArray(participant.messages[0].messages)) {
                     messages.push(participant.messages[0].messages[participant.messages[0].messages.length-1]);
                     participantPurposes.push(participant.purpose);
                 }
