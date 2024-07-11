@@ -103,21 +103,18 @@ let onMessage = (data) => {
 
             name = (purpose === 'customer') ? customerName : agentAlias
 
-            if (publish) {
+            if (publish && !messageIds.includes(messageId)) { // Make sure message is published only once
                 conversationsApi.getConversationsMessageMessage(data.eventBody.id, messageId)
                 .then((messageDetail => {
-                    // Make sure message is published only once
-                    if(!messageIds.includes(messageId)){
-                        // Ignore messages without text (e.g. Presence/Disconect Event)
-                        if (null != messageDetail.textBody) {
-                            messageIds.push(messageId);
+                    // Ignore messages without text (e.g. Presence/Disconect Event)
+                    if (null != messageDetail.textBody) {
+                        messageIds.push(messageId);
 
-                            // Wait for translate to finish before calling addChatMessage
-                            translate.translateText(messageDetail.textBody, genesysCloudLanguage, function(translatedData) {
-                                view.addChatMessage(name, translatedData.translated_text, purpose);
-                                translationData = translatedData;
-                            });
-                        }
+                        // Wait for translate to finish before calling addChatMessage
+                        translate.translateText(messageDetail.textBody, genesysCloudLanguage, function(translatedData) {
+                            view.addChatMessage(name, translatedData.translated_text, purpose);
+                            translationData = translatedData;
+                        });
                     }                    
                 }));          
             }            
