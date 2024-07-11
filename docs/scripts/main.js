@@ -152,7 +152,7 @@ function sendChat(){
     // Translate text to customer's local language
     translate.translateText(message, sourceLang, function(translatedData) {
         // Wait for translate to finish before calling sendMessage
-        sendMessage(translatedData.translated_text, currentConversationId, communicationId);
+        sendMessage(translatedData.translated_text, currentConversationId, communicationId, message);
     });
 
     document.getElementById('message-textarea').value = '';
@@ -161,7 +161,7 @@ function sendChat(){
 /**
  *  Send message to the customer
  */
-function sendMessage(message, conversationId, communicationId){
+function sendMessage(message, conversationId, communicationId, originalMessage = ''){
     console.log(message);
 
     if(messageType === 'chat') {
@@ -178,7 +178,13 @@ function sendMessage(message, conversationId, communicationId){
             {
                 'textBody': message
             }
-        )
+        ).then(result => {
+            if(originalMessage) {
+                // Do not double-translate message - show as agent entered it
+                messageIds.push(result.id);
+                view.addChatMessage(agentAlias, originalMessage, 'agent');
+            }
+        });
     }    
 }
 
