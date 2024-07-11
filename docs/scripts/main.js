@@ -77,7 +77,7 @@ let onMessage = (data) => {
             // Heartbeat
             //console.info('Ignoring metadata: ', notification);
             return;
-        } else if (data.eventBody.conversationId != currentConversationId) {
+        } else if (data.eventBody.id != currentConversationId) {
             // Conversation event not related to the current conversationId (in this frame)
             // Ignore
             return;
@@ -85,7 +85,7 @@ let onMessage = (data) => {
             console.log('ending conversation');
         } else {
             data.eventBody.participants.forEach((participant) => {
-                if(!participant.endTime) {
+                if(!participant.endTime && Array.isArray(participant.messages[0].messages)) {
                     messages.push(participant.messages[0].messages[participant.messages[0].messages.length-1]);
                     participantPurposes.push(participant.purpose);
                 }
@@ -234,28 +234,35 @@ function showChatTranscript(conversationId){
         }).then((data) => {
             data.entities.reverse();
 
-            // Show each message
-            data.entities.forEach((msg) => {
-                let message = msg.textBody;
-                // Ignore message withtout text (e.g. Presence/Disconnect Event)
-                if (null != message) {
-                    let name = '';
-                    let purpose = '';
+            const translationResults = [];
 
-                    if(msg.direction === 'inbound') {
-                        name = customerName;
-                        purpose = 'customer';
-                    } else {
-                        name = agentAlias;
-                        purpose = 'agent'
-                    }
-
-                    // Wait for translate to finish before calling addChatMessage
-                    translate.translateText(message, genesysCloudLanguage, function(translatedData) {
-                        view.addChatMessage(name, translatedData.translated_text, purpose);
-                        translationData = translatedData;
-                    });
+            // Parse and translate each message
+            data.entities.forEach(msg => {
+                // Ignore message without text (e.g. Presence/Disconnect Event)
+                if(msg.textBody == null) {
+                    return;
                 }
+
+                translationResults.push(new Promise((resolve, reject) => {
+                    translate.translateText(msg.textBody, genesysCloudLanguage, translatedData => {
+                        translationData = translatedData;
+                        resolve({
+                            direction: msg.direction,
+                            text: translatedData.translated_text
+                        });
+                    });
+                }));
+            });
+
+            return Promise.all(translationResults);
+        }).then(data => {
+            // When all messages translated, display them in order
+            data.forEach(translated => {
+                view.addChatMessage(
+                    translated.direction === 'inbound' ? customerName : agentAlias,
+                    translated.text,
+                    translated.direction === 'inbound' ? 'customer' : 'agent'
+                );
             });
         });
     }
