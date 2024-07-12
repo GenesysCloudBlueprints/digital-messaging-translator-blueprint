@@ -20,10 +20,10 @@ const languageCodeMapping = {
     'ja': 'ja',
     'zh-cn': 'zh',
     'zh-tw': 'zh-TW'
-}
+};
 
 export default {
-    translateText(text, language, callback){
+    translateText(text, language, callback) {
         let language_code = languageCodeMapping[language] ? 
                     languageCodeMapping[language] : language;
 
@@ -31,7 +31,7 @@ export default {
             raw_text: text,
             source_language: 'auto',
             target_language: language_code
-        }
+        };
 
         fetch(config.translateServiceURI,
             {
@@ -50,4 +50,4 @@ export default {
         })
         .catch(e => console.error(e));
     }
-}
+};
