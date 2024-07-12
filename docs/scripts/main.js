@@ -25,44 +25,37 @@ let messageIds = [];
 
 /**
  * Callback function for 'message' and 'typing-indicator' events.
- * 
- * @param {Object} data the event data  
+ *
+ * @param {Object} data the event data
  */
-let onMessage = (data) => {
+const onMessage = data => {
     console.log(JSON.stringify(data));
 
-    if(messageType === 'chat'){
-        switch(data.metadata.type){
-            case 'typing-indicator':
-                break;
-            case 'message':
-                // Values from the event
-                let eventBody = data.eventBody;
-                let message = eventBody.body;
-                let senderId = eventBody.sender.id;
-    
-                // Conversation values for cross reference
-                let participant = currentConversation.participants.find(p => p.chats[0].id == senderId);
-                let name = '';
-                let purpose = '';
-    
-                if(participant.name != null) {
-                    name = participant.name;
-                    purpose = participant.purpose;
-                } else {
-                    name = 'BOT';
-                    purpose = 'agent';
-                }
-    
-                // Wait for translate to finish before calling addChatMessage
-                translate.translateText(message, genesysCloudLanguage, function(translatedData) {
-                    view.addChatMessage(name, translatedData.translated_text, purpose);
-                    translationData = translatedData;
-                });
-    
-                break;
+    if(messageType === 'chat' && data.metadata.type === 'message') {
+        // Values from the event
+        let eventBody = data.eventBody;
+        let message = eventBody.body;
+        let senderId = eventBody.sender.id;
+
+        // Conversation values for cross reference
+        let participant = currentConversation.participants.find(p => p.chats[0].id === senderId);
+        let name = '';
+        let purpose = '';
+
+        if(participant.name != null) {
+            name = participant.name;
+            purpose = participant.purpose;
+        } else {
+            name = 'BOT';
+            purpose = 'agent';
         }
-    } else if (messageType === 'message') {
+
+        // Wait for translate to finish before calling addChatMessage
+        translate.translateText(message, genesysCloudLanguage, function(translatedData) {
+            view.addChatMessage(name, translatedData.translated_text, purpose);
+            translationData = translatedData;
+        });
+    } else if(messageType === 'message') {
         let messageId = '';
         let purpose = '';
         let name = '';
@@ -73,27 +66,27 @@ let onMessage = (data) => {
         var mostRecentMessageTime = '';
 
         // Discard unwanted notifications
-        if (data.topicName.toLowerCase() === 'channel.metadata') {
+        if(data.topicName.toLowerCase() === 'channel.metadata') {
             // Heartbeat
-            //console.info('Ignoring metadata: ', notification);
+            // console.info('Ignoring metadata: ', notification);
             return;
-        } else if (data.eventBody.id != currentConversationId) {
+        } else if(data.eventBody.id !== currentConversationId) {
             // Conversation event not related to the current conversationId (in this frame)
             // Ignore
             return;
-        } else if (data.eventBody.participants.find(p => p.purpose == 'customer').endTime) {
+        } else if(data.eventBody.participants.find(p => p.purpose === 'customer').endTime) {
             console.log('ending conversation');
         } else {
-            data.eventBody.participants.forEach((participant) => {
+            data.eventBody.participants.forEach(participant => {
                 if(!participant.endTime && Array.isArray(participant.messages[0].messages)) {
-                    messages.push(participant.messages[0].messages[participant.messages[0].messages.length-1]);
+                    messages.push(participant.messages[0].messages[participant.messages[0].messages.length - 1]);
                     participantPurposes.push(participant.purpose);
                 }
             });
 
-            for (var x=0; x<messages.length; x++) {
+            for(let x = 0; x < messages.length; x++) {
                 console.log('messageTime: ' + messages[x].messageTime);
-                if (messages[x].messageTime > mostRecentMessageTime) {
+                if(messages[x].messageTime > mostRecentMessageTime) {
                     mostRecentMessageTime = messages[x].messageTime;
                     messageId = messages[x].messageId;
                     purpose = participantPurposes[x];
@@ -101,48 +94,49 @@ let onMessage = (data) => {
                 }
             }
 
-            name = (purpose === 'customer') ? customerName : agentAlias
+            name = (purpose === 'customer') ? customerName : agentAlias;
 
-            if (publish && !messageIds.includes(messageId)) { // Make sure message is published only once
+            if(publish && !messageIds.includes(messageId)) { // Make sure message is published only once
                 conversationsApi.getConversationsMessageMessage(data.eventBody.id, messageId)
                 .then((messageDetail => {
-                    // Ignore messages without text (e.g. Presence/Disconect Event)
-                    if (null != messageDetail.textBody) {
-                        messageIds.push(messageId);
+                    // Ignore messages without text (e.g. Presence/Disconnect Event)
+                    if(messageDetail.textBody == null) {
+                        return;
+                    }
+                    messageIds.push(messageId);
 
-                        // Wait for translate to finish before calling addChatMessage
-                        translate.translateText(messageDetail.textBody, genesysCloudLanguage, function(translatedData) {
-                            view.addChatMessage(name, translatedData.translated_text, purpose);
-                            translationData = translatedData;
-                        });
-                    }                    
-                }));          
-            }            
+                    // Wait for translate to finish before calling addChatMessage
+                    translate.translateText(messageDetail.textBody, genesysCloudLanguage, function(translatedData) {
+                        view.addChatMessage(name, translatedData.translated_text, purpose);
+                        translationData = translatedData;
+                    });
+                }));
+            }
         }
-    }    
+    }
 };
 
 /**
  *  Translate then send message to the customer
  */
-function sendChat(){
+function sendChat() {
     let message = document.getElementById('message-textarea').value;
 
     // Get the last agent participant, this also fixes an issue when an agent
     // gets reconnected and reassigned a new participant id.
-    let agentsArr = currentConversation.participants.filter(p => p.purpose == 'agent');
+    let agentsArr = currentConversation.participants.filter(p => p.purpose === 'agent');
     let agent = agentsArr[agentsArr.length - 1];
     let communicationId = '';
 
     if(messageType === 'chat') {
         communicationId = agent.chats[0].id;
-    } else if (messageType === 'message') { 
+    } else if(messageType === 'message') {
         communicationId = agent.messages[0].id;
     }
 
     let sourceLang;
 
-    // Default language to english if no source_language available    
+    // Default language to english if no source_language available
     if(translationData === null) {
         sourceLang = 'en';
     } else {
@@ -161,22 +155,22 @@ function sendChat(){
 /**
  *  Send message to the customer
  */
-function sendMessage(message, conversationId, communicationId, originalMessage = ''){
+function sendMessage(message, conversationId, communicationId, originalMessage = '') {
     console.log(message);
 
     if(messageType === 'chat') {
         conversationsApi.postConversationsChatCommunicationMessages(
             conversationId, communicationId,
             {
-                'body': message,
-                'bodyType': 'standard'
+                body: message,
+                bodyType: 'standard'
             }
-        )
-    } else if (messageType === 'message') { 
+        );
+    } else if(messageType === 'message') {
         conversationsApi.postConversationsMessageCommunicationMessages(
             conversationId, communicationId,
             {
-                'textBody': message
+                textBody: message
             }
         ).then(result => {
             if(originalMessage) {
@@ -185,31 +179,31 @@ function sendMessage(message, conversationId, communicationId, originalMessage =
                 view.addChatMessage(agentAlias, originalMessage, 'agent');
             }
         });
-    }    
+    }
 }
 
 /**
  * Show the chat messages for a conversation
- * @param {String} conversationId 
- * @returns {Promise} 
+ * @param {String} conversationId
+ * @returns {Promise}
  */
-function showChatTranscript(conversationId){
-    if(messageType === 'chat'){
+function showChatTranscript(conversationId) {
+    if(messageType === 'chat') {
         return conversationsApi.getConversationsChatMessages(conversationId)
-        .then((data) => {
+        .then(data => {
             // Show each message
-            data.entities.forEach((msg) => {
+            data.entities.forEach(msg => {
                 if(msg.hasOwnProperty('body')) {
                     let message = msg.body;
 
-                    // Determine the name by cross referencing sender id 
+                    // Determine the name by cross referencing sender id
                     // with the participant.chats.id from the conversation parameter
                     let senderId = msg.sender.id;
                     let name = currentConversation
-                                .participants.find(p => p.chats[0].id == senderId)
+                                .participants.find(p => p.chats[0].id === senderId)
                                 .name;
                     let purpose = currentConversation
-                                .participants.find(p => p.chats[0].id == senderId)
+                                .participants.find(p => p.chats[0].id === senderId)
                                 .purpose;
 
                     // Wait for translate to finish before calling addChatMessage
@@ -220,21 +214,21 @@ function showChatTranscript(conversationId){
                 }
             });
         });
-    } else if (messageType === 'message') {
+    } else if(messageType === 'message') {
         return conversationsApi.getConversation(conversationId)
-        .then((data) => {
-            data.participants.forEach((participant) => {
+        .then(data => {
+            data.participants.forEach(participant => {
                 if(participant.purpose === 'customer' || participant.purpose === 'agent') {
-                    participant.messages.forEach((message) => {
-                        message.messages.forEach((msg) => {
+                    participant.messages.forEach(message => {
+                        message.messages.forEach(msg => {
                             messageIds.push(msg.messageId);
-                        })
-                    })
+                        });
+                    });
                 }
             });
 
-            return conversationsApi.postConversationsMessageMessagesBulk(conversationId, { 'body': messageIds })
-        }).then((data) => {
+            return conversationsApi.postConversationsMessageMessagesBulk(conversationId, { body: messageIds });
+        }).then(data => {
             data.entities.reverse();
 
             const translationResults = [];
@@ -246,7 +240,7 @@ function showChatTranscript(conversationId){
                     return;
                 }
 
-                translationResults.push(new Promise((resolve, reject) => {
+                translationResults.push(new Promise(resolve => {
                     translate.translateText(msg.textBody, genesysCloudLanguage, translatedData => {
                         translationData = translatedData;
                         resolve({
@@ -273,17 +267,17 @@ function showChatTranscript(conversationId){
 
 /**
  * Set-up the channel for chat conversations
- * @param {String} conversationId 
+ * @param {String} conversationId
  * @returns {Promise}
  */
-function setupChatChannel(conversationId){
+function setupChatChannel(conversationId) {
     return controller.createChannel()
-    .then(data => {
+    .then(() => {
         // Subscribe to all incoming messages
         return controller.addSubscription(
             `v2.users.${userId}.conversations`,
             onMessage)
-        .then(data => {
+        .then(() => {
             return controller.addSubscription(
                 `v2.conversations.chats.${conversationId}.messages`,
                 onMessage);
@@ -291,24 +285,24 @@ function setupChatChannel(conversationId){
     });
 }
 
-/**	
- * This toggles between translator and canned response iframe	
- */	
-function toggleIframe(){	
-    let label = document.getElementById('toggle-iframe').textContent;	
+/**
+ * This toggles between translator and canned response iframe
+ */
+function toggleIframe() {
+    let label = document.getElementById('toggle-iframe').textContent;
 
-    if(label === 'Open Chat Translator'){	
+    if(label === 'Open Chat Translator') {
         document.getElementById('toggle-iframe').textContent = 'Open Canned Responses';
         document.getElementById('agent-assist').style.display = 'block';
         document.getElementById('canned-response-container').style.display = 'none';
-    } else {	
+    } else {
         document.getElementById('toggle-iframe').textContent = 'Open Chat Translator';
         document.getElementById('agent-assist').style.display = 'none';
         document.getElementById('canned-response-container').style.display = 'block';
-        
+
         // Only call getLibraries function if element does not have a child
-        if(document.getElementById('libraries-container').childNodes.length == 0) getLibraries();
-    }	
+        if(document.getElementById('libraries-container').childNodes.length === 0) getLibraries();
+    }
 }
 
 /** --------------------------
@@ -317,10 +311,10 @@ function toggleIframe(){
 /**
  * Get all libraries in the org
  */
- function getLibraries(){    
+function getLibraries() {
     return responseManagementApi.getResponsemanagementLibraries()
-    .then((libraries) => {
-        libraries.entities.forEach((library) => {
+    .then(libraries => {
+        libraries.entities.forEach(library => {
             getResponses(library.id, library.name);
         });
     });
@@ -328,15 +322,15 @@ function toggleIframe(){
 
 /**
  * Get all responses of each library
- * @param {String} libraryId 
- * @param {String} libraryName 
+ * @param {String} libraryId
+ * @param {String} libraryName
  */
-function getResponses(libraryId, libraryName){
+function getResponses(libraryId, libraryName) {
     return responseManagementApi.getResponsemanagementResponses(libraryId)
-    .then((responses) => {
+    .then(responses => {
         view.displayLibraries(libraryId, libraryName);
 
-        responses.entities.forEach((response) => {
+        responses.entities.forEach(response => {
             view.displayResponses(response, doResponseSubstitution);
         });
     });
@@ -344,12 +338,12 @@ function getResponses(libraryId, libraryName){
 
 /**
  * Search all responses in the org
- * @param {String} query 
+ * @param {String} query
  */
-function searchResponse(query){
-    return responseManagementApi.postResponsemanagementResponsesQuery({'queryPhrase': query})
-    .then((responses) => {
-        responses.results.entities.forEach((response) => {
+function searchResponse(query) {
+    return responseManagementApi.postResponsemanagementResponsesQuery({ queryPhrase: query })
+    .then(responses => {
+        responses.results.entities.forEach(response => {
             view.toggleDIVs();
             view.displaySearchResults(response, doResponseSubstitution);
         });
@@ -359,24 +353,23 @@ function searchResponse(query){
 /**
  * Replaces the dynamic variables in canned responses with appropriate
  * values. This function is used in the view when an agent clicks a response.
- * @param {String} text 
- * @param {String} responseId 
+ * @param {String} text
+ * @param {String} responseId
  */
-function doResponseSubstitution(text, responseId){
+function doResponseSubstitution(text, responseId) {
     let finalText = text;
 
     // Do the default substitutions first
     finalText = finalText.replace(/{{AGENT_NAME}}/g, agentName);
     finalText = finalText.replace(/{{CUSTOMER_NAME}}/g, customerName);
     finalText = finalText.replace(/{{AGENT_ALIAS}}/g, agentAlias);
-    
 
     let participantData = currentConversation.participants
-                            .find(p => p.purpose == 'customer').attributes;
+                            .find(p => p.purpose === 'customer').attributes;
 
     // Do the custom substitutions
     return responseManagementApi.getResponsemanagementResponse(responseId)
-    .then((responseData) => {
+    .then(responseData => {
         let subs = responseData.substitutions;
         subs.forEach(sub => {
             let subRegex = new RegExp(`{{${sub.id}}}`, 'g');
@@ -384,7 +377,7 @@ function doResponseSubstitution(text, responseId){
 
             // Check if substitution exists on the participant data, if not
             // use default value
-            if(participantData[sub.id]){
+            if(participantData[sub.id]) {
                 val = participantData[sub.id];
             } else {
                 val = sub.defaultValue ? sub.defaultValue : val;
@@ -396,12 +389,12 @@ function doResponseSubstitution(text, responseId){
         return finalText;
     })
     .catch(e => console.error(e));
-}    
+}
 
 /** --------------------------------------------------------------
  *                       EVENT HANDLERS
  * -------------------------------------------------------------- */
-document.getElementById('toggle-iframe')	
+document.getElementById('toggle-iframe')
     .addEventListener('click', () => toggleIframe());
 
 document.getElementById('chat-form')
@@ -411,8 +404,8 @@ document.getElementById('btn-send-message')
     .addEventListener('click', () => sendChat());
 
 document.getElementById('message-textarea')
-    .addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
+    .addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') {
             sendChat();
             if(e.preventDefault) e.preventDefault(); // prevent new line
             return false; // Just a workaround for old browsers
@@ -420,14 +413,14 @@ document.getElementById('message-textarea')
     });
 
 document.getElementById('find-response-btn')
-    .addEventListener('click', function(){
+    .addEventListener('click', function() {
         let query = document.getElementById('find-response').value;
         searchResponse(query);
     });
 
 document.getElementById('find-response')
-    .addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
+    .addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') {
             let query = document.getElementById('find-response').value;
             searchResponse(query);
         }
@@ -459,7 +452,7 @@ client.loginImplicitGrant(
     let stateData = JSON.parse(data.state);
     currentConversationId = stateData.conversationId;
     genesysCloudLanguage = stateData.language;
-    
+
     // Get Details of current User
     return usersApi.getUsersMe();
 }).then(userMe => {
@@ -469,27 +462,26 @@ client.loginImplicitGrant(
 
     // Get current conversation
     return conversationsApi.getConversation(currentConversationId);
-}).then((conv) => { 
+}).then(conv => {
     currentConversation = conv;
-    let customer = conv.participants.find(p => p.purpose == 'customer')
+    let customer = conv.participants.find(p => p.purpose === 'customer');
 
     if(null != customer.chats && customer.chats.length > 0) {
         messageType = 'chat';
         customerName = customer.name;
-    } else if (null != customer.messages && customer.messages.length > 0){
+    } else if(null != customer.messages && customer.messages.length > 0) {
         messageType = 'message';
         customerName = 'customer';
-        if (null != customer.attributes && customer.attributes.hasOwnProperty('name')) {
+        if(null != customer.attributes && customer.attributes.hasOwnProperty('name')) {
             customerName = customer.attributes['name'];
         }
     }
 
     return setupChatChannel(currentConversationId);
-}).then(data => { 
+}).then(() => {
     // Get current chat conversations
     return showChatTranscript(currentConversationId);
-}).then(data => {
+}).then(() => {
     console.log('Finished Setup');
-
 // Error Handling
 }).catch(e => console.log(e));
