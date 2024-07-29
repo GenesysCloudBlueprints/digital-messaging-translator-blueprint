@@ -1,7 +1,7 @@
 /**
  * This script is focused on the HTML / displaying of data to the page
  */
-function updateScroll(){
+function updateScroll() {
     let div = document.getElementById('agent-assist');
     div.scrollTop = div.scrollHeight;
 }
@@ -9,10 +9,10 @@ function updateScroll(){
 /**
  * Clear DIV of previous search results
  */
-function clearSearchResults(){
-    let searchContainer = document.getElementById("search-result-container");
+function clearSearchResults() {
+    let searchContainer = document.getElementById('search-result-container');
 
-    while (searchContainer.childNodes.length > 1) {  
+    while(searchContainer.childNodes.length > 1) {
         searchContainer.removeChild(searchContainer.lastChild);
     }
 }
@@ -20,14 +20,14 @@ function clearSearchResults(){
 /**
  * Convert the html content of the canned response to plain text
  */
-function htmlToPlain(rawHtml){
+function htmlToPlain(rawHtml) {
     let finalText = rawHtml;
     finalText = finalText.replace(/<\/div>/ig, '\n');
     finalText = finalText.replace(/<\/li>/ig, '\n');
     finalText = finalText.replace(/<li>/ig, '  *  ');
     finalText = finalText.replace(/<\/ul>/ig, '\n');
     finalText = finalText.replace(/<\/p>/ig, '\n');
-    finalText = finalText.replace(/<br\s*[\/]?>/gi, "\n");
+    finalText = finalText.replace(/<br\s*[/]?>/gi, '\n');
     finalText = finalText.replace(/<[^>]+>/ig, '');
 
     return finalText;
@@ -39,7 +39,7 @@ export default {
      * @param {String} sender sender name to be displayed
      * @param {String} message chat message to be displayed
      */
-    addChatMessage(sender, message, purpose){        
+    addChatMessage(sender, message, purpose) {
         let chatMsg = document.createElement('p');
         chatMsg.textContent = sender + ': ' + message;
 
@@ -53,22 +53,22 @@ export default {
 
     /**
      * Display list of libraries
-     * @param {String} libraryId 
-     * @param {String} libraryName 
+     * @param {String} libraryId
+     * @param {String} libraryName
      */
-    displayLibraries(libraryId, libraryName){
+    displayLibraries(libraryId, libraryName) {
         let libContainer = document.createElement('button');
         libContainer.textContent = libraryName;
         libContainer.id = 'library-' + libraryId;
         libContainer.className = 'collapsible';
         libContainer.addEventListener('click', function() {
             this.classList.toggle('active');
-            let content = this.nextElementSibling;	
-            if (content.style.display === 'block') {	
-                content.style.display = 'none';	
-            } else {	
-                content.style.display = 'block';	
-            }	
+            let content = this.nextElementSibling;
+            if(content.style.display === 'block') {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
         });
         document.getElementById('libraries-container').appendChild(libContainer);
 
@@ -80,9 +80,9 @@ export default {
 
     /**
      * Display responses and group by libraries
-     * @param {Object} response 
+     * @param {Object} response
      */
-    displayResponses(response, doResponseSubstitution){
+    displayResponses(response, doResponseSubstitution) {
         let responseId = response.id;
 
         // Collapsible response name
@@ -92,12 +92,12 @@ export default {
         responseButton.className = 'collapsible';
         responseButton.addEventListener('click', function() {
             this.classList.toggle('active');
-            let content = this.nextElementSibling;	
-            if (content.style.display === 'block') {	
-                content.style.display = 'none';	
-            } else {	
-                content.style.display = 'block';	
-            }	
+            let content = this.nextElementSibling;
+            if(content.style.display === 'block') {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
         });
         document.getElementById('responses-container-' + response.libraries[0].id).appendChild(responseButton);
 
@@ -109,7 +109,7 @@ export default {
         responseText.addEventListener('click', function() {
             let text = htmlToPlain(response.texts[0].content);
             doResponseSubstitution(text, responseId)
-            .then((finalText) => {
+            .then(finalText => {
                 document.getElementById('message-textarea').value = finalText;
             })
             .catch(e => console.error(e));
@@ -119,9 +119,9 @@ export default {
 
     /**
      * Displays all search results in a DIV
-     * @param {object} results 
+     * @param {object} results
      */
-    displaySearchResults(results, doResponseSubstitution){
+    displaySearchResults(results, doResponseSubstitution) {
         let responseId = results.id;
 
         // Collapsible response name
@@ -131,12 +131,12 @@ export default {
         responseButton.className = 'collapsible';
         responseButton.addEventListener('click', function() {
             this.classList.toggle('active');
-            let content = this.nextElementSibling;	
-            if (content.style.display === 'block') {	
-                content.style.display = 'none';	
-            } else {	
-                content.style.display = 'block';	
-            }	
+            let content = this.nextElementSibling;
+            if(content.style.display === 'block') {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
         });
         document.getElementById('search-result-container').appendChild(responseButton);
 
@@ -148,7 +148,7 @@ export default {
         responseText.addEventListener('click', function() {
             let text = htmlToPlain(results.texts[0].content);
             doResponseSubstitution(text, responseId)
-            .then((finalText) => {
+            .then(finalText => {
                 document.getElementById('message-textarea').value = finalText;
             })
             .catch(e => console.error(e));
@@ -159,11 +159,11 @@ export default {
     /**
      * This toggles between showing Canned Responses or Search Results
      */
-    toggleDIVs(){
+    toggleDIVs() {
         let cannedDIV = document.getElementById('libraries-container');
         let searchDIV = document.getElementById('search-result-container');
 
-        if(cannedDIV.style.display === 'block'){
+        if(cannedDIV.style.display === 'block') {
             cannedDIV.style.display = 'none';
             searchDIV.style.display = 'block';
         } else {
@@ -172,7 +172,7 @@ export default {
         }
 
         // Clear DIV of previous search results
-        let searchContainer = document.getElementById("search-result-container");
+        let searchContainer = document.getElementById('search-result-container');
         if(searchContainer.children.length > 1) clearSearchResults();
     }
-}
+};

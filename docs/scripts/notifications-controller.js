@@ -18,11 +18,10 @@ let subscriptionMap = {
 /**
  * Callback function for notications event-handling.
  * It will reference the subscriptionMap to determine what function to run
- * @param {Object} event 
+ * @param {Object} event
  */
-function onSocketMessage(event){
+function onSocketMessage(event) {
     let data = JSON.parse(event.data);
-
     subscriptionMap[data.topicName](data);
 }
 
@@ -31,7 +30,7 @@ export default {
      * Creation of the channel. If called multiple times,
      * the last one will be the active one.
      */
-    createChannel(){
+    createChannel() {
         return notificationsApi.postNotificationsChannels()
         .then(data => {
             console.log('---- Created Notifications Channel ----');
@@ -48,14 +47,14 @@ export default {
      * @param {String} topic PureCloud notification topic string
      * @param {Function} callback callback function to fire when the event occurs
      */
-    addSubscription(topic, callback){
-        let body = [{'id': topic}]
+    addSubscription(topic, callback) {
+        let body = [{ id: topic }];
 
         return notificationsApi.postNotificationsChannelSubscriptions(
                 channel.id, body)
-        .then((data) => {
+        .then(() => {
             subscriptionMap[topic] = callback;
             console.log(`Added subscription to ${topic}`);
         });
     }
-}
+};
