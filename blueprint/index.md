@@ -142,7 +142,7 @@ After you have created the Genesys Cloud objects, use a Messenger deployment to 
 1. Navigate to **Admin** > **Message** > **Messenger Deployments** > **dev-web-messaging-deployment**.
 2. Under **Deploy your snippet**, click **Copy to Clipboard** to copy the snippet. Paste the snippet in the `<head>` tag of the web pages where you want the Messenger to appear.
 
-### Host and run the Node.js app server
+### Running locally
 
 1. Verify that you are running Node.js v14.15.4 or later. 
   * To verify your version, run `node-v`.
@@ -151,6 +151,11 @@ After you have created the Genesys Cloud objects, use a Messenger deployment to 
 
 2. Switch to the folder where the files for your messaging translation assistant are located. In the local node-modules folder run `npm install` to install the dependencies.
 3. To run the server locally, run `node run-local.js`.
+
+### Running via Docker
+
+1. In your terminal, run `docker build -t translate-digital-messaging .` to build the Docker image.
+2. To run the Docker container, run `docker run -p 443:443 translate-digital-messaging`.
 
 ### Test the solution
 
