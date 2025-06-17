@@ -9,7 +9,7 @@ resource "genesyscloud_integration" "integration" {
     properties = jsonencode({
         "sandbox": "allow-scripts,allow-same-origin,allow-forms,allow-modals",
         "groups": [var.groupId],
-        "communicationTypeFilter": "chat, webmessaging",
+        "communicationTypeFilter": "webmessaging",
         "queueIdFilterList": [var.queueId],
         "url": "https://localhost/?conversationid={{gcConversationId}}&language={{gcLangTag}}",
         "permissions": null

@@ -31,31 +31,7 @@ let messageIds = [];
 const onMessage = data => {
     console.log(JSON.stringify(data));
 
-    if(messageType === 'chat' && data.metadata.type === 'message') {
-        // Values from the event
-        let eventBody = data.eventBody;
-        let message = eventBody.body;
-        let senderId = eventBody.sender.id;
-
-        // Conversation values for cross reference
-        let participant = currentConversation.participants.find(p => p.chats[0].id === senderId);
-        let name = '';
-        let purpose = '';
-
-        if(participant.name != null) {
-            name = participant.name;
-            purpose = participant.purpose;
-        } else {
-            name = 'BOT';
-            purpose = 'agent';
-        }
-
-        // Wait for translate to finish before calling addChatMessage
-        translate.translateText(message, genesysCloudLanguage, function(translatedData) {
-            view.addChatMessage(name, translatedData.translated_text, purpose);
-            translationData = translatedData;
-        });
-    } else if(messageType === 'message') {
+    if(messageType === 'message') {
         let messageId = '';
         let purpose = '';
         let name = '';
@@ -126,13 +102,7 @@ function sendChat() {
     // gets reconnected and reassigned a new participant id.
     let agentsArr = currentConversation.participants.filter(p => p.purpose === 'agent');
     let agent = agentsArr[agentsArr.length - 1];
-    let communicationId = '';
-
-    if(messageType === 'chat') {
-        communicationId = agent.chats[0].id;
-    } else if(messageType === 'message') {
-        communicationId = agent.messages[0].id;
-    }
+    let communicationId = agent.messages[0].id;
 
     let sourceLang;
 
@@ -158,115 +128,77 @@ function sendChat() {
 function sendMessage(message, conversationId, communicationId, originalMessage = '') {
     console.log(message);
 
-    if(messageType === 'chat') {
-        conversationsApi.postConversationsChatCommunicationMessages(
-            conversationId, communicationId,
-            {
-                body: message,
-                bodyType: 'standard'
-            }
-        );
-    } else if(messageType === 'message') {
-        conversationsApi.postConversationsMessageCommunicationMessages(
-            conversationId, communicationId,
-            {
-                textBody: message
-            }
-        ).then(result => {
-            if(originalMessage) {
-                // Do not double-translate message - show as agent entered it
-                messageIds.push(result.id);
-                view.addChatMessage(agentAlias, originalMessage, 'agent');
-            }
-        });
-    }
+    conversationsApi.postConversationsMessageCommunicationMessages(
+        conversationId, communicationId,
+        {
+            textBody: message
+        }
+    ).then(result => {
+        if(originalMessage) {
+            // Do not double-translate message - show as agent entered it
+            messageIds.push(result.id);
+            view.addChatMessage(agentAlias, originalMessage, 'agent');
+        }
+    });
 }
 
 /**
- * Show the chat messages for a conversation
+ * Show the messages for a conversation
  * @param {String} conversationId
  * @returns {Promise}
  */
 function showChatTranscript(conversationId) {
-    if(messageType === 'chat') {
-        return conversationsApi.getConversationsChatMessages(conversationId)
-        .then(data => {
-            // Show each message
-            data.entities.forEach(msg => {
-                if(msg.hasOwnProperty('body')) {
-                    let message = msg.body;
-
-                    // Determine the name by cross referencing sender id
-                    // with the participant.chats.id from the conversation parameter
-                    let senderId = msg.sender.id;
-                    let name = currentConversation
-                                .participants.find(p => p.chats[0].id === senderId)
-                                .name;
-                    let purpose = currentConversation
-                                .participants.find(p => p.chats[0].id === senderId)
-                                .purpose;
-
-                    // Wait for translate to finish before calling addChatMessage
-                    translate.translateText(message, genesysCloudLanguage, function(translatedData) {
-                        view.addChatMessage(name, translatedData.translated_text, purpose);
-                        translationData = translatedData;
+    return conversationsApi.getConversation(conversationId)
+    .then(data => {
+        data.participants.forEach(participant => {
+            if(participant.purpose === 'customer' || participant.purpose === 'agent') {
+                participant.messages.forEach(message => {
+                    message.messages.forEach(msg => {
+                        messageIds.push(msg.messageId);
                     });
-                }
-            });
+                });
+            }
         });
-    } else if(messageType === 'message') {
-        return conversationsApi.getConversation(conversationId)
-        .then(data => {
-            data.participants.forEach(participant => {
-                if(participant.purpose === 'customer' || participant.purpose === 'agent') {
-                    participant.messages.forEach(message => {
-                        message.messages.forEach(msg => {
-                            messageIds.push(msg.messageId);
-                        });
+
+        return conversationsApi.postConversationsMessageMessagesBulk(conversationId, { body: messageIds });
+    }).then(data => {
+        data.entities.reverse();
+
+        const translationResults = [];
+
+        // Parse and translate each message
+        data.entities.forEach(msg => {
+            // Ignore message without text (e.g. Presence/Disconnect Event)
+            if(msg.textBody == null) {
+                return;
+            }
+
+            translationResults.push(new Promise(resolve => {
+                translate.translateText(msg.textBody, genesysCloudLanguage, translatedData => {
+                    translationData = translatedData;
+                    resolve({
+                        direction: msg.direction,
+                        text: translatedData.translated_text
                     });
-                }
-            });
-
-            return conversationsApi.postConversationsMessageMessagesBulk(conversationId, { body: messageIds });
-        }).then(data => {
-            data.entities.reverse();
-
-            const translationResults = [];
-
-            // Parse and translate each message
-            data.entities.forEach(msg => {
-                // Ignore message without text (e.g. Presence/Disconnect Event)
-                if(msg.textBody == null) {
-                    return;
-                }
-
-                translationResults.push(new Promise(resolve => {
-                    translate.translateText(msg.textBody, genesysCloudLanguage, translatedData => {
-                        translationData = translatedData;
-                        resolve({
-                            direction: msg.direction,
-                            text: translatedData.translated_text
-                        });
-                    });
-                }));
-            });
-
-            return Promise.all(translationResults);
-        }).then(data => {
-            // When all messages translated, display them in order
-            data.forEach(translated => {
-                view.addChatMessage(
-                    translated.direction === 'inbound' ? customerName : agentAlias,
-                    translated.text,
-                    translated.direction === 'inbound' ? 'customer' : 'agent'
-                );
-            });
+                });
+            }));
         });
-    }
+
+        return Promise.all(translationResults);
+    }).then(data => {
+        // When all messages translated, display them in order
+        data.forEach(translated => {
+            view.addChatMessage(
+                translated.direction === 'inbound' ? customerName : agentAlias,
+                translated.text,
+                translated.direction === 'inbound' ? 'customer' : 'agent'
+            );
+        });
+    });
 }
 
 /**
- * Set-up the channel for chat conversations
+ * Set-up the channel for messaging conversations
  * @param {String} conversationId
  * @returns {Promise}
  */
@@ -276,12 +208,7 @@ function setupChatChannel(conversationId) {
         // Subscribe to all incoming messages
         return controller.addSubscription(
             `v2.users.${userId}.conversations`,
-            onMessage)
-        .then(() => {
-            return controller.addSubscription(
-                `v2.conversations.chats.${conversationId}.messages`,
-                onMessage);
-        });
+            onMessage);
     });
 }
 
@@ -291,12 +218,12 @@ function setupChatChannel(conversationId) {
 function toggleIframe() {
     let label = document.getElementById('toggle-iframe').textContent;
 
-    if(label === 'Open Chat Translator') {
+    if(label === 'Open Messaging Translator') {
         document.getElementById('toggle-iframe').textContent = 'Open Canned Responses';
         document.getElementById('agent-assist').style.display = 'block';
         document.getElementById('canned-response-container').style.display = 'none';
     } else {
-        document.getElementById('toggle-iframe').textContent = 'Open Chat Translator';
+        document.getElementById('toggle-iframe').textContent = 'Open Messaging Translator';
         document.getElementById('agent-assist').style.display = 'none';
         document.getElementById('canned-response-container').style.display = 'block';
 
@@ -436,7 +363,7 @@ const urlParams = new URLSearchParams(window.location.search);
 currentConversationId = urlParams.get('conversationid');
 genesysCloudLanguage = urlParams.get('language');
 
-client.setPersistSettings(true, 'chat-translator');
+client.setPersistSettings(true, 'messaging-translator');
 client.setEnvironment(config.genesysCloud.region);
 client.loginImplicitGrant(
     config.clientID,
@@ -466,15 +393,10 @@ client.loginImplicitGrant(
     currentConversation = conv;
     let customer = conv.participants.find(p => p.purpose === 'customer');
 
-    if(null != customer.chats && customer.chats.length > 0) {
-        messageType = 'chat';
-        customerName = customer.name;
-    } else if(null != customer.messages && customer.messages.length > 0) {
-        messageType = 'message';
-        customerName = 'customer';
-        if(null != customer.attributes && customer.attributes.hasOwnProperty('name')) {
-            customerName = customer.attributes['name'];
-        }
+    messageType = 'message';
+    customerName = 'customer';
+    if(null != customer.attributes && customer.attributes.hasOwnProperty('name')) {
+        customerName = customer.attributes['name'];
     }
 
     return setupChatChannel(currentConversationId);

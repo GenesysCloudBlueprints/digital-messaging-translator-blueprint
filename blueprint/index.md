@@ -6,7 +6,7 @@ icon: blueprint
 image: images/banner.png
 category: 6
 summary: |
-  This Genesys Cloud Developer Blueprint provides instructions for building a messaging translation assistant, which uses the AWS Translate service to allow customers and agents to chat in their preferred languages. The messaging translation assistant automatically translates everything in the right side of the Interactions panel in real-time, including canned responses. This solution supports both web chat and web messaging interactions. You can deploy all the components used in this solution with the Terraform Genesys Cloud CX as Code provider.
+  This Genesys Cloud Developer Blueprint provides instructions for building a messaging translation assistant, which uses the AWS Translate service to allow customers and agents to chat in their preferred languages. The messaging translation assistant automatically translates everything in the right side of the Interactions panel in real-time, including canned responses. This solution supports web messaging interactions. You can deploy all the components used in this solution with the Terraform Genesys Cloud CX as Code provider.
 ---
 :::{"alert":"primary","title":"About Genesys Cloud Blueprints","autoCollapse":false} 
 Genesys Cloud blueprints were built to help you jump-start building an application or integrating with a third-party partner. 
@@ -16,13 +16,13 @@ For more details on Genesys Cloud blueprint support and practices
 please see our Genesys Cloud blueprint [FAQ](https://developer.genesys.cloud/blueprints/faq)sheet.
 :::
 
-This Genesys Cloud Developer Blueprint provides instructions for building a messaging translation assistant which uses the AWS Translate service to allow customers and agents to chat in their preferred languages. The messaging translation assistant automatically translates everything in the right side of the Interactions panel in real-time, including canned responses. This solution supports both web chat and web messaging interactions. You can deploy all the components used in this solution with the Terraform Genesys Cloud CX as Code provider.
+This Genesys Cloud Developer Blueprint provides instructions for building a messaging translation assistant which uses the AWS Translate service to allow customers and agents to chat in their preferred languages. The messaging translation assistant automatically translates everything in the right side of the Interactions panel in real-time, including canned responses. This solution supports web messaging interactions. You can deploy all the components used in this solution with the Terraform Genesys Cloud CX as Code provider.
 
 ![Messaging translation assistant](images/overview.png "Messaging translation assistant")
 
 ## Scenario
 
-An organization wants to provide a real-time translation for web chat and web messaging that allows customers and agents to have a conversation using their preferred languages:
+An organization wants to provide a real-time translation for web messaging that allows customers and agents to have a conversation using their preferred languages:
 
 1. **The customer sends a message in their preferred language.** The agent receives the customer's incoming message in its original language.
 
@@ -34,7 +34,7 @@ An organization wants to provide a real-time translation for web chat and web me
 
 * **Genesys Cloud CX** - A suite of Genesys Cloud services for enterprise-grade communications, collaboration, and contact center management. In this solution, you use an Architect inbound message flow, a Genesys Cloud integration, a Genesys Cloud queue, web messaging configuration, and web messaging deployment.
 * **Architect flows** - A flow in Architect, a drag and drop web-based design tool, dictates how Genesys Cloud handles inbound or outbound interactions.  In this solution, an inbound message flow provides the routing layer that gets the customer to the right queue.
-* **Interaction widget integration** - The Genesys Cloud integration that enables web apps to be embedded in an iframe within Genesys Cloud. The iframe  appears only on specified interaction types and to specified agents. For this solution, Genesys Cloud uses the Interaction Widget integration to show translated web chat and web messages to the customer.
+* **Interaction widget integration** - The Genesys Cloud integration that enables web apps to be embedded in an iframe within Genesys Cloud. The iframe  appears only on specified interaction types and to specified agents. For this solution, Genesys Cloud uses the Interaction Widget integration to show translated web messages to the customer.
 * **Web messaging and Messenger** - The Genesys Cloud messaging platform that enables asynchronous conversations and a unified agent and supervisor experience across all Genesys Cloud messaging channels. Messenger is the predefined message window that customers use to communicate with bots and agents. 
 * **CX as Code** - A Genesys Cloud Terraform provider that provides an interface for declaring core Genesys Cloud objects.
 * **AWS IAM** - Identity and Access Management that controls access to AWS resources such as services or features. In this solution, you set the permissions to allow the messaging translation assistant to access Amazon Translate and the AWS for JavaScript SDK.
@@ -42,7 +42,7 @@ An organization wants to provide a real-time translation for web chat and web me
 
 ### Software development kits (SDKs)
 
-* **Genesys Cloud Platform API SDK** - Client libraries used to simplify application integration with Genesys Cloud by handling low-level HTTP requests. In this solution, this SDK is used for the initial chat and messaging interaction between agent and customer.
+* **Genesys Cloud Platform API SDK** - Client libraries used to simplify application integration with Genesys Cloud by handling low-level HTTP requests. In this solution, this SDK is used for the messaging interaction between agent and customer.
 * **AWS for JavaScript SDK** - This SDK enables developers to build and deploy applications that use AWS services. This solution uses the JavaScript API to enable messaging translation in an agent's browser and it uses the inside Node.js applications to enable the messaging translation interaction widget on the server where Genesys Cloud runs.
 
 ## Prerequisites
@@ -135,7 +135,7 @@ After the `terraform apply --auto-approve` command completes, you should see the
 1. Navigate to **Admin** > **Integrations** > **OAuth** > **Web Messages Implicit Client**.
 2. In your local blueprint repository, open the [config.js](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint/blob/main/docs/scripts/config.js) file. Add the client ID from your OAuth client and specify the region where your Genesys Cloud organization is located, for example, `mypurecloud.ie` or `mypurecloud.com.au`.
 
-### Web messaging only: deploy the snippet to your website
+### Deploy the web messaging snippet to your website
 
 After you have created the Genesys Cloud objects, use a Messenger deployment to add a Messenger chat window to your website.
 
@@ -159,7 +159,7 @@ After you have created the Genesys Cloud objects, use a Messenger deployment to 
 
 ### Test the solution
 
-#### Translate web messaging interactions
+#### Test the messaging translator
 
 1. Go to your website and start a web message.
    ![Start web message interaction](images/start-web-message.png "Start web message interaction")
@@ -175,37 +175,11 @@ After you have created the Genesys Cloud objects, use a Messenger deployment to 
 5. To send a translated canned response, click **Open Canned Responses** and select a canned response.  
   ![Translated canned response](images/translate-canned-response.png "Translated canned response")
 
-#### Translate web chat interactions
 
-1. Create a Genesys web chat widget. For more information, see [Create a widget for web chat](https://help.mypurecloud.com/?p=195772 "Opens the Create a widget for web chat article") in the Genesys Cloud Resource Center.
-
-  :::primary
-  **Important**: If you use the Genesys Cloud developer tools to test this solution, make sure that under **Widget Type** you select **Version 2**, **Version 1.1**, or **Third Party**. For more information, see [About widgets for web chat](https://help.mypurecloud.com/articles/?p=194115 "Opens the About widgets for web chat article") in the Genesys Cloud Resource Center.
-  :::
-
-2. Open the [Web Chat developer tool](https://developer.mypurecloud.com/developer-tools/#/webchat "Opens the Web Chat developer tool").
-
-  :::primary
-  **Important**: Make sure that the Developer Center URL matches the region where your Genesys Cloud organization is located. For more information, see the [Access the developer tools](https://developer.genesys.cloud/platform/quickstarts-guide/developer-tools/#accessTools "Goes to the Access the developer tools section on the Developer tools quick start page") section on the Developer tools quick start page.
-  :::
-
-3. Go to the [Chat Configuration page in the Genesys Cloud Developer Center](https://developer.genesys.cloud/developer-tools/#/webchat "Opens the Chat Configuration page in the Genesys Cloud Developer Center").
-4. Click **Populate Fields**.
-5. To start a chat as a customer, click **Start Chat**.
-6. To answer the chat as an agent, in your Genesys Cloud organization change your status to **On Queue** and then answer the incoming interaction.
-  ![Chat interaction](images/chat-interaction.png "Incoming chat interaction")
-7. To open the messaging translation assistant, click the **Messaging Translator** button, which appears in the agent's toolbar.
-8. Practice sending and receiving chats in different languages. When you type a chat, the messaging translation assistant automatically translates it into the language that the customer is using.
-  :::primary
-  **Important**: Make sure to type on the right pane of the interaction for the messaging translation assistant to successfully translate the agent's message.
-  :::
-  ![Translated chat](images/chat-translate.png "Translated chat")
-9. To send a translated canned response, click **Open Canned Responses** and select a canned response.  
-  ![Translated canned response](images/translate-canned-response-chat.png "Translated canned response")
 
 ## Additional resources
 
 * [SDK Documentation Explorer](https://developer.genesys.cloud/devapps/sdk/docexplorer "Opens the Genesys Cloud Platform Client SDK page")
 * [About web messaging](https://help.mypurecloud.com/articles/about-web-messaging/ "Opens the About Web Messaging page")
 * [Amazon Translate](https://aws.amazon.com/translate/ "Opens Amazon Translate page in the AWS documentation") 
-* [digital-messaging-translator-blueprint repository](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint "Opens the chat-translator-blueprint repository in GitHub") 
+* [digital-messaging-translator-blueprint repository](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint "Opens the digital-messaging-translator-blueprint repository in GitHub") 
