@@ -1,8 +1,8 @@
 export default {
-    // Token Implicit Grant Client ID
+    // Token Implicit Grant Client ID (maria trovato)
     clientID: 'your-client-id-here',
 
-    redirectUri: 'https://localhost/',
+    redirectUri: 'https://main.dakbcqmjwax8i.amplifyapp.com',
 
     genesysCloud: {
         // Genesys Cloud region
@@ -10,5 +10,6 @@ export default {
         region: 'mypurecloud.com'
     },
 
+    // TODO: replace to call a lambda function to translate service
     translateServiceURI: 'https://localhost/translate'
 } 

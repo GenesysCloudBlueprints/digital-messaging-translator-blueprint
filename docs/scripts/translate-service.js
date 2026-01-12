@@ -33,6 +33,7 @@ export default {
             target_language: language_code
         };
 
+        //TODO: al hacer el request es mejor hacer colocarle el api key para obtener mayor seguridad
         fetch(config.translateServiceURI,
             {
                 method: 'POST',

@@ -11,7 +11,7 @@ resource "genesyscloud_integration" "integration" {
         "groups": [var.groupId],
         "communicationTypeFilter": "webmessaging",
         "queueIdFilterList": [var.queueId],
-        "url": "https://localhost/?conversationid={{gcConversationId}}&language={{gcLangTag}}",
+        "url": "https://main.dakbcqmjwax8i.amplifyapp.com/?conversationid={{gcConversationId}}&language={{gcLangTag}}",
         "permissions": null
     })
     advanced = jsonencode({
