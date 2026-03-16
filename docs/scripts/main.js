@@ -365,20 +365,40 @@ genesysCloudLanguage = urlParams.get('language');
 
 client.setPersistSettings(true, 'messaging-translator');
 client.setEnvironment(config.genesysCloud.region);
-client.loginImplicitGrant(
-    config.clientID,
-    config.redirectUri,
-    { state: JSON.stringify({
+
+// Check if we have a token from the OAuth callback
+const token = urlParams.get('token');
+
+let authPromise;
+if (token) {
+    // Token was provided by the backend after code exchange
+    client.setAccessToken(token);
+    const stateParam = urlParams.get('state') || '{}';
+    authPromise = Promise.resolve({ state: stateParam });
+} else {
+    // No token — redirect to Genesys Cloud login for authorization code flow
+    const state = JSON.stringify({
         conversationId: currentConversationId,
         language: genesysCloudLanguage
-    }) })
+    });
+    const loginUrl = `https://login.${config.genesysCloud.region}/oauth/authorize`
+        + `?response_type=code`
+        + `&client_id=${config.clientID}`
+        + `&redirect_uri=${encodeURIComponent(config.redirectUri)}`
+        + `&state=${encodeURIComponent(state)}`;
+    window.location.replace(loginUrl);
+    authPromise = new Promise(() => {}); // Never resolves — page is redirecting
+}
+
+authPromise
 .then(data => {
     console.log(data);
 
     // Assign conversation id
-    let stateData = JSON.parse(data.state);
-    currentConversationId = stateData.conversationId;
-    genesysCloudLanguage = stateData.language;
+    let stateData = {};
+    try { stateData = JSON.parse(data.state); } catch(e) {}
+    currentConversationId = stateData.conversationId || currentConversationId;
+    genesysCloudLanguage = stateData.language || genesysCloudLanguage;
 
     // Get Details of current User
     return usersApi.getUsersMe();

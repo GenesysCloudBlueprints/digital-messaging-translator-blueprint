@@ -82,7 +82,7 @@ An organization wants to provide a real-time translation for web messaging that 
 2. Add a policy to the IAM that grants full access to the AWS Translate service. For more information, see [Managing IAM policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html "Opens Managing IAM policies") in the AWS documentation.
 3. Create an access key for the IAM user. For more information, see [Managing access keys for IAM users](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html "Opens Managing access keys for IAM users") in the AWS documentation.
 4. Write down the access key and secret.
-5. Create an .ENV file in the directory folder and provide values for the following variables: `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`.
+5. Create an .ENV file in the directory folder and provide values for the following variables: `AWS_REGION`, `AWS_ACCESS_KEY_ID`,  `AWS_SECRET_ACCESS_KEY`, `GENESYSCLOUD_OAUTHCLIENT_ID`, `GENESYSCLOUD_OAUTHCLIENT_SECRET`, and `GENESYSCLOUD_REGION`.
 
   :::primary
   **Tip**: Start with the sample.env file in this blueprint solution, rename it to `.env` and provide your org-specific details.
@@ -132,7 +132,7 @@ After the `terraform apply --auto-approve` command completes, you should see the
 
 ### Update the config file found in /docs/scripts/config.js to use the OAuth client
 
-1. Navigate to **Admin** > **Integrations** > **OAuth** > **Web Messages Implicit Client**.
+1. Navigate to **Admin** > **Integrations** > **OAuth** > **Web Messages Code Auth Client**.
 2. In your local blueprint repository, open the [config.js](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint/blob/main/docs/scripts/config.js) file. Add the client ID from your OAuth client and specify the region where your Genesys Cloud organization is located, for example, `mypurecloud.ie` or `mypurecloud.com.au`.
 
 ### Deploy the web messaging snippet to your website

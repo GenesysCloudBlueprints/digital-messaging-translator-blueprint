@@ -2,6 +2,7 @@ const https = require('https');
 const fs = require('fs');
 const express = require('express');
 const { Translate } = require('@aws-sdk/client-translate');
+const platformClient = require('purecloud-platform-client-v2');
 require('dotenv').config();
 const cors = require('cors');
 
@@ -15,6 +16,20 @@ const translateService = new Translate({
 });
 const app = express();
 
+// Genesys Cloud config from environment variables
+const clientId = process.env.GENESYS_CLIENT_ID;
+const clientSecret = process.env.GENESYS_CLIENT_SECRET;
+const region = process.env.GENESYS_REGION;
+
+// Allow Genesys Cloud to frame this app
+app.use((req, res, next) => {
+    res.setHeader(
+        'Content-Security-Policy',
+        "frame-ancestors 'self' https://apps.mypurecloud.com"
+    );
+    next();
+});
+
 // Local ssl certificates
 const privateKey = fs.readFileSync('ssl/_localhost.key', 'utf8');
 const certificate = fs.readFileSync('ssl/_localhost.crt', 'utf8');
@@ -26,6 +41,29 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const httpsServer = https.createServer(credentials, app);
+
+// OAuth callback route - exchanges auth code for token
+app.get('/oauth/callback', (req, res) => {
+    const authCode = req.query.code;
+    const state = req.query.state || '{}';
+
+    if (!authCode) {
+        return res.status(400).send('Missing authorization code');
+    }
+
+    const client = platformClient.ApiClient.instance;
+    client.setEnvironment(region);
+
+    client.loginCodeAuthorizationGrant(clientId, clientSecret, authCode, 'https://localhost/oauth/callback')
+    .then((authData) => {
+        const token = authData.accessToken;
+        res.redirect(`/?token=${encodeURIComponent(token)}&state=${encodeURIComponent(state)}`);
+    })
+    .catch((err) => {
+        console.error('Auth code exchange failed:', err);
+        res.status(500).send('Authentication failed');
+    });
+});
 
 app.post('/translate', (req, res) => {
     const body = req.body;

@@ -1,8 +1,8 @@
 export default {
-    // Token Implicit Grant Client ID
+    // Code Authorization Grant Client ID
     clientID: 'your-client-id-here',
 
-    redirectUri: 'https://localhost/',
+    redirectUri: 'https://localhost/oauth/callback',
 
     genesysCloud: {
         // Genesys Cloud region
