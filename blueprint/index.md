@@ -82,7 +82,7 @@ An organization wants to provide a real-time translation for web messaging that 
 2. Add a policy to the IAM that grants full access to the AWS Translate service. For more information, see [Managing IAM policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html "Opens Managing IAM policies") in the AWS documentation.
 3. Create an access key for the IAM user. For more information, see [Managing access keys for IAM users](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html "Opens Managing access keys for IAM users") in the AWS documentation.
 4. Write down the access key and secret.
-5. Create an .ENV file in the directory folder and provide values for the following variables: `AWS_REGION`, `AWS_ACCESS_KEY_ID`,  `AWS_SECRET_ACCESS_KEY`, `GENESYS_CLIENT_ID`, `GENESYS_CLIENT_SECRET`, and `GENESYSCLOUD_REGION`.
+5. Create an .ENV file in the directory folder and provide values for the following variables: `AWS_REGION`, `AWS_ACCESS_KEY_ID`,  `AWS_SECRET_ACCESS_KEY`, `GENESYS_CLIENT_ID`, `GENESYS_CLIENT_SECRET`, and `GENESYS_REGION`.
 
   :::primary
   **Tip**: Start with the sample.env file in this blueprint solution, rename it to `.env` and provide your org-specific details.
