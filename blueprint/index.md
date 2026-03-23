@@ -57,7 +57,7 @@ An organization wants to provide a real-time translation for web messaging that 
 ### Genesys Cloud account
 
 * A Genesys Cloud license. For more information, see [Genesys Cloud Pricing](https://www.genesys.com/pricing "Opens the Genesys Cloud pricing page") in the Genesys website.
-* The Master Admin role. For more information, see [Roles and permissions overview](https://help.mypurecloud.com/?p=24360 "Opens the Roles and permissions overview article") in the Genesys Cloud Resource Center.
+* The Master Admin role. For more information, see [Roles and permissions overview](https://help.genesys.cloud/?p=24360 "Opens the Roles and permissions overview article") in the Genesys Cloud Resource Center.
 * CX as Code. For more information, see [CX as Code](https://developer.genesys.cloud/devapps/cx-as-code/ "Goes to the CX as Code page") in the Genesys Cloud Developer Center.
 
 ### AWS account
@@ -82,7 +82,7 @@ An organization wants to provide a real-time translation for web messaging that 
 2. Add a policy to the IAM that grants full access to the AWS Translate service. For more information, see [Managing IAM policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html "Opens Managing IAM policies") in the AWS documentation.
 3. Create an access key for the IAM user. For more information, see [Managing access keys for IAM users](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html "Opens Managing access keys for IAM users") in the AWS documentation.
 4. Write down the access key and secret.
-5. Create an .ENV file in the directory folder and provide values for the following variables: `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`.
+5. Create an .ENV file in the directory folder and provide values for the following variables: `AWS_REGION`, `AWS_ACCESS_KEY_ID`,  `AWS_SECRET_ACCESS_KEY`, `GENESYS_CLIENT_ID`, `GENESYS_CLIENT_SECRET`, and `GENESYS_REGION`.
 
   :::primary
   **Tip**: Start with the sample.env file in this blueprint solution, rename it to `.env` and provide your org-specific details.
@@ -132,20 +132,20 @@ After the `terraform apply --auto-approve` command completes, you should see the
 
 ### Update the config file found in /docs/scripts/config.js to use the OAuth client
 
-1. Navigate to **Admin** > **Integrations** > **OAuth** > **Web Messages Implicit Client**.
+1. Navigate to **Menu** > **IT and Integrations** > **OAuth** > **Web Messages Code Auth Client**.
 2. In your local blueprint repository, open the [config.js](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint/blob/main/docs/scripts/config.js) file. Add the client ID from your OAuth client and specify the region where your Genesys Cloud organization is located, for example, `mypurecloud.ie` or `mypurecloud.com.au`.
 
 ### Deploy the web messaging snippet to your website
 
 After you have created the Genesys Cloud objects, use a Messenger deployment to add a Messenger chat window to your website.
 
-1. Navigate to **Admin** > **Message** > **Messenger Deployments** > **dev-web-messaging-deployment**.
+1. Navigate to **Menu** > **Digital and Telephony** > **Message** > **Messenger Deployments** > **dev-web-messaging-deployment**.
 2. Under **Deploy your snippet**, click **Copy to Clipboard** to copy the snippet. Paste the snippet in the `<head>` tag of the web pages where you want the Messenger to appear.
 
 ### Running locally
 
 1. Verify that you are running Node.js v14.15.4 or later. 
-  * To verify your version, run `node-v`.
+  * To verify your version, run `node -v`.
   * To upgrade, run `nvm install 14.15.4`.
   * To install the latest version, run `npm install -g n latest`.
 
@@ -180,6 +180,6 @@ After you have created the Genesys Cloud objects, use a Messenger deployment to 
 ## Additional resources
 
 * [SDK Documentation Explorer](https://developer.genesys.cloud/devapps/sdk/docexplorer "Opens the Genesys Cloud Platform Client SDK page")
-* [About web messaging](https://help.mypurecloud.com/articles/about-web-messaging/ "Opens the About Web Messaging page")
+* [About web messaging](https://help.genesys.cloud/articles/about-web-messaging/ "Opens the About Web Messaging page")
 * [Amazon Translate](https://aws.amazon.com/translate/ "Opens Amazon Translate page in the AWS documentation") 
 * [digital-messaging-translator-blueprint repository](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint "Opens the digital-messaging-translator-blueprint repository in GitHub") 

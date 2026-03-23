@@ -1,7 +1,7 @@
 /*
    Creates the Token Implicit Grant OAuth Client
 */
-module "implicit_oauth" {
+module "code_auth_oauth" {
   source = "./modules/oauth_client"
 }
 
