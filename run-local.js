@@ -16,16 +16,27 @@ const translateService = new Translate({
 });
 const app = express();
 
-// Genesys Cloud config from environment variables
-const clientId = process.env.GENESYS_CLIENT_ID;
-const clientSecret = process.env.GENESYS_CLIENT_SECRET;
-const region = process.env.GENESYS_REGION;
+// Genesys Cloud OAuth credentials, keyed by region
+const regions = (process.env.GENESYS_REGIONS || '').split(',').map(r => r.trim()).filter(Boolean);
 
-// Allow Genesys Cloud to frame this app
+// Turns a region like "mypurecloud.com" into the env var suffix "MYPURECLOUD_COM"
+const regionEnvKey = region => region.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+
+const credentialsByRegion = regions.reduce((acc, region) => {
+    const key = regionEnvKey(region);
+    acc[region] = {
+        clientId: process.env[`GENESYS_CLIENT_ID_${key}`],
+        clientSecret: process.env[`GENESYS_CLIENT_SECRET_${key}`]
+    };
+    return acc;
+}, {});
+
+// Allow Genesys Cloud to frame this app, for every configured region
 app.use((req, res, next) => {
+    const frameAncestors = regions.map(region => `https://apps.${region}`).join(' ');
     res.setHeader(
         'Content-Security-Policy',
-        "frame-ancestors 'self' https://apps.mypurecloud.com"
+        `frame-ancestors 'self' ${frameAncestors}`
     );
     next();
 });
@@ -42,6 +53,19 @@ app.use(express.urlencoded({ extended: true }));
 
 const httpsServer = https.createServer(credentials, app);
 
+// Returns the (non-secret) OAuth client ID configured for a given region,
+// so the frontend can build the authorize URL for the org it's embedded in.
+app.get('/oauth/client-id', (req, res) => {
+    const region = req.query.region;
+    const credentials = credentialsByRegion[region];
+
+    if (!credentials || !credentials.clientId) {
+        return res.status(404).send(`No OAuth client configured for region: ${region}`);
+    }
+
+    res.json({ clientId: credentials.clientId });
+});
+
 // OAuth callback route - exchanges auth code for token
 app.get('/oauth/callback', (req, res) => {
     const authCode = req.query.code;
@@ -51,10 +75,18 @@ app.get('/oauth/callback', (req, res) => {
         return res.status(400).send('Missing authorization code');
     }
 
+    let region;
+    try { region = JSON.parse(state).region; } catch (e) {}
+
+    const credentials = credentialsByRegion[region];
+    if (!credentials || !credentials.clientSecret) {
+        return res.status(400).send(`No OAuth client configured for region: ${region}`);
+    }
+
     const client = platformClient.ApiClient.instance;
     client.setEnvironment(region);
 
-    client.loginCodeAuthorizationGrant(clientId, clientSecret, authCode, 'https://localhost/oauth/callback')
+    client.loginCodeAuthorizationGrant(credentials.clientId, credentials.clientSecret, authCode, `https://localhost:${PORT}/oauth/callback`)
     .then((authData) => {
         const token = authData.accessToken;
         res.redirect(`/?token=${encodeURIComponent(token)}&state=${encodeURIComponent(state)}`);
@@ -91,5 +123,6 @@ app.post('/translate', (req, res) => {
 });
 
 
-httpsServer.listen(443);
-console.log('HTTPS listening on: 443');
+const PORT = process.env.PORT || 8443;
+httpsServer.listen(PORT);
+console.log(`HTTPS listening on: ${PORT}`);
