@@ -76,13 +76,13 @@ const onMessage = data => {
                 conversationsApi.getConversationsMessageMessage(data.eventBody.id, messageId)
                 .then((messageDetail => {
                     // Ignore messages without text (e.g. Presence/Disconnect Event)
-                    if(messageDetail.textBody == null) {
+                    if(messageDetail.normalizedMessage.text == null) {
                         return;
                     }
                     messageIds.push(messageId);
 
                     // Wait for translate to finish before calling addChatMessage
-                    translate.translateText(messageDetail.textBody, genesysCloudLanguage, function(translatedData) {
+                    translate.translateText(messageDetail.normalizedMessage.text, genesysCloudLanguage, function(translatedData) {
                         view.addChatMessage(name, translatedData.translated_text, purpose);
                         translationData = translatedData;
                     });
@@ -169,12 +169,12 @@ function showChatTranscript(conversationId) {
         // Parse and translate each message
         data.entities.forEach(msg => {
             // Ignore message without text (e.g. Presence/Disconnect Event)
-            if(msg.textBody == null) {
+            if(msg.normalizedMessage.text == null) {
                 return;
             }
 
             translationResults.push(new Promise(resolve => {
-                translate.translateText(msg.textBody, genesysCloudLanguage, translatedData => {
+                translate.translateText(msg.normalizedMessage.text, genesysCloudLanguage, translatedData => {
                     translationData = translatedData;
                     resolve({
                         direction: msg.direction,
@@ -363,8 +363,17 @@ const urlParams = new URLSearchParams(window.location.search);
 currentConversationId = urlParams.get('conversationid');
 genesysCloudLanguage = urlParams.get('language');
 
+// Genesys Cloud appends the host app's origin to our iframe URL, e.g.
+// "https://apps.mypurecloud.ie" — use it to work out which region (and
+// therefore which OAuth client) this session belongs to.
+const gcHostOrigin = urlParams.get('gcHostOrigin');
+const genesysCloudRegion = gcHostOrigin
+    ? new URL(gcHostOrigin).hostname.replace(/^apps\./, '')
+    : config.genesysCloud.defaultRegion;
+const serverOrigin = new URL(config.redirectUri).origin;
+
 client.setPersistSettings(true, 'messaging-translator');
-client.setEnvironment(config.genesysCloud.region);
+client.setEnvironment(genesysCloudRegion);
 
 // Check if we have a token from the OAuth callback
 const token = urlParams.get('token');
@@ -376,18 +385,68 @@ if (token) {
     const stateParam = urlParams.get('state') || '{}';
     authPromise = Promise.resolve({ state: stateParam });
 } else {
-    // No token — redirect to Genesys Cloud login for authorization code flow
-    const state = JSON.stringify({
-        conversationId: currentConversationId,
-        language: genesysCloudLanguage
+    // No token — Genesys Cloud sandboxes this iframe without top-navigation
+    // rights, so we can't redirect the widget itself to the login page.
+    // Show a login button; the click opens the OAuth flow in a popup, and
+    // once the popup lands back on our own origin with a token, we read it
+    // straight off the popup's URL and close it.
+    const loginOverlay = document.getElementById('login-overlay');
+    loginOverlay.style.display = 'flex';
+
+    authPromise = new Promise((resolve, reject) => {
+        document.getElementById('login-btn').addEventListener('click', () => {
+            fetch(`${serverOrigin}/oauth/client-id?region=${encodeURIComponent(genesysCloudRegion)}`)
+                .then(res => {
+                    if (!res.ok) throw new Error(`No OAuth client configured for region: ${genesysCloudRegion}`);
+                    return res.json();
+                })
+                .then(({ clientId }) => {
+                    const state = JSON.stringify({
+                        conversationId: currentConversationId,
+                        language: genesysCloudLanguage,
+                        region: genesysCloudRegion
+                    });
+                    const loginUrl = `https://login.${genesysCloudRegion}/oauth/authorize`
+                        + `?response_type=code`
+                        + `&client_id=${clientId}`
+                        + `&redirect_uri=${encodeURIComponent(config.redirectUri)}`
+                        + `&state=${encodeURIComponent(state)}`;
+
+                    const popup = window.open(loginUrl, 'gc-oauth-login', 'width=500,height=700');
+                    if (!popup) {
+                        throw new Error('Login popup was blocked. Please allow popups for this site and try again.');
+                    }
+
+                    const poll = setInterval(() => {
+                        if (popup.closed) {
+                            clearInterval(poll);
+                            reject(new Error('Login popup was closed before completing sign-in.'));
+                            return;
+                        }
+
+                        // Reading popup.location throws while it's still on a
+                        // foreign origin (the Genesys Cloud login pages) —
+                        // that's expected, just keep polling.
+                        let popupUrl;
+                        try { popupUrl = new URL(popup.location.href); } catch (e) { return; }
+                        if (popupUrl.origin !== serverOrigin) return;
+
+                        const popupToken = popupUrl.searchParams.get('token');
+                        if (!popupToken) return; // back on our origin, but the backend hasn't redirected with a token yet
+
+                        clearInterval(poll);
+                        popup.close();
+                        client.setAccessToken(popupToken);
+                        loginOverlay.style.display = 'none';
+                        resolve({ state: popupUrl.searchParams.get('state') || '{}' });
+                    }, 500);
+                })
+                .catch(e => {
+                    console.error(e);
+                    reject(e);
+                });
+        });
     });
-    const loginUrl = `https://login.${config.genesysCloud.region}/oauth/authorize`
-        + `?response_type=code`
-        + `&client_id=${config.clientID}`
-        + `&redirect_uri=${encodeURIComponent(config.redirectUri)}`
-        + `&state=${encodeURIComponent(state)}`;
-    window.location.replace(loginUrl);
-    authPromise = new Promise(() => {}); // Never resolves — page is redirecting
 }
 
 authPromise

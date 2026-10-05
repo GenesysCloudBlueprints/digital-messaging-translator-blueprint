@@ -82,7 +82,7 @@ An organization wants to provide a real-time translation for web messaging that 
 2. Add a policy to the IAM that grants full access to the AWS Translate service. For more information, see [Managing IAM policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_manage.html "Opens Managing IAM policies") in the AWS documentation.
 3. Create an access key for the IAM user. For more information, see [Managing access keys for IAM users](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html "Opens Managing access keys for IAM users") in the AWS documentation.
 4. Write down the access key and secret.
-5. Create an .ENV file in the directory folder and provide values for the following variables: `AWS_REGION`, `AWS_ACCESS_KEY_ID`,  `AWS_SECRET_ACCESS_KEY`, `GENESYS_CLIENT_ID`, `GENESYS_CLIENT_SECRET`, and `GENESYS_REGION`.
+5. Create an .ENV file in the directory folder and provide values for `AWS_REGION`, `AWS_ACCESS_KEY_ID`, and `AWS_SECRET_ACCESS_KEY`. The Genesys Cloud OAuth variables (`GENESYS_REGIONS` and the per-region client ID/secret pairs) are covered in [Configure the OAuth client credentials](#configure-the-oauth-client-credentials) below.
 
   :::primary
   **Tip**: Start with the sample.env file in this blueprint solution, rename it to `.env` and provide your org-specific details.
@@ -130,10 +130,18 @@ After the `terraform apply --auto-approve` command completes, you should see the
 
 * As long as you keep your local Terraform backing state projects, you can tear down this blueprint solution by changing to the `docs/terraform` folder and issuing a `terraform destroy --auto-approve` command. This command destroys all objects currently managed by the local Terraform backing state.
 
-### Update the config file found in /docs/scripts/config.js to use the OAuth client
+### Configure the OAuth client credentials
+
+The app detects which Genesys Cloud region it's embedded in at runtime, so its OAuth client ID and secret are configured per region in your `.env` file rather than hardcoded in `config.js`.
 
 1. Navigate to **Menu** > **IT and Integrations** > **OAuth** > **Web Messages Code Auth Client**.
-2. In your local blueprint repository, open the [config.js](https://github.com/GenesysCloudBlueprints/digital-messaging-translator-blueprint/blob/main/docs/scripts/config.js) file. Add the client ID from your OAuth client and specify the region where your Genesys Cloud organization is located, for example, `mypurecloud.ie` or `mypurecloud.com.au`.
+2. In your local blueprint repository, copy `sample.env` to `.env` (if you haven't already) and add your Genesys Cloud region to the comma-separated `GENESYS_REGIONS` list, for example `mypurecloud.ie` or `mypurecloud.com.au`.
+3. Add the OAuth client's ID and secret using env var names built from that region — upper-cased with non-alphanumeric characters replaced by underscores. For example, for region `mypurecloud.ie`:
+   ```
+   GENESYS_CLIENT_ID_MYPURECLOUD_IE="your-client-id"
+   GENESYS_CLIENT_SECRET_MYPURECLOUD_IE="your-client-secret"
+   ```
+   Repeat this for every region you want this deployment to support.
 
 ### Deploy the web messaging snippet to your website
 

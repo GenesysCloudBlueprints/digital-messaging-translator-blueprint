@@ -7,7 +7,7 @@ resource "genesyscloud_integration" "integration" {
   config {
     name = "Messaging Translator"
     properties = jsonencode({
-        "sandbox": "allow-scripts,allow-same-origin,allow-forms,allow-modals",
+        "sandbox": "allow-scripts,allow-same-origin,allow-forms,allow-modals,allow-popups",
         "groups": [var.groupId],
         "communicationTypeFilter": "webmessaging",
         "queueIdFilterList": [var.queueId],
